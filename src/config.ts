@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 import { TatumFeature, TatumIndex, FeatureInfo } from './types.js';
 import { GatewayService } from './services/gateway.js';
 
@@ -21,17 +20,14 @@ export class TatumConfig {
   }
 
   private findFeaturesPath(): string {
-    // Get the directory of the current module
-    const currentDir = path.dirname(fileURLToPath(import.meta.url));
-    
     // Try multiple possible locations for features directory
     const possiblePaths = [
       // Current working directory (when run from project root)
       path.join(process.cwd(), 'features'),
-      // Relative to the current module location (handles both src and dist)
-      path.join(currentDir, '..', 'features'),
-      // Relative to dist directory (when running compiled version)
-      path.join(currentDir, '..', '..', 'features')
+      // Common relative paths for different execution contexts
+      path.join(process.cwd(), '..', 'features'),
+      path.join(process.cwd(), 'src', '..', '..', 'features'),
+      path.join(process.cwd(), 'dist', '..', 'features')
     ];
 
     for (const featuresPath of possiblePaths) {
