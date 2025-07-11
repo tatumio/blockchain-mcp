@@ -1,0 +1,11 @@
+/core-api/
+mistakes.log
+product.log
+dist/
+node_modules/
+.trae
+build.js
+features.config.js
+features.config.d.ts
+/generator/
+coverage/

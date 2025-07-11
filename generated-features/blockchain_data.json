@@ -1,0 +1,551 @@
+{
+  "feature": {
+    "name": "Blockchain Data",
+    "description": "Access blockchain data including blocks, transactions, balances, and network information across 40+ supported blockchains",
+    "category": "data",
+    "version": "1.0.0",
+    "authentication": {
+      "required": true,
+      "type": "api_key",
+      "header": "X-API-Key"
+    },
+    "supportedBlockchains": [
+      "security",
+      "tatum"
+    ]
+  },
+  "tools": [
+    {
+      "name": "get_metadata",
+      "description": "Fetch metadata of NFTs or multitokens by token address and IDs.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "The blockchain address of the NFT to get metadata for.",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenIds": {
+            "type": "string",
+            "description": "The IDs of the tokens to get metadata for.\nIt is possible to enter list of multiple IDs as a comma separated string.\n"
+          }
+        },
+        "required": [
+          "chain",
+          "tokenAddress",
+          "tokenIds"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/metadata",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "get_wallet_balance_by_time",
+      "description": "Get native wallet balances at specific time or block.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "addresses": {
+            "type": "string",
+            "description": "The blockchain public wallet addresses.\nIt is possible to enter list of up to 10 addresses as a comma separated string.\n"
+          },
+          "blockNumber": {
+            "type": "string",
+            "description": "Block number."
+          },
+          "time": {
+            "type": "string",
+            "description": "Time when block is processed."
+          },
+          "unix": {
+            "type": "number",
+            "description": "Unix timestamp when block is processed."
+          }
+        },
+        "required": [
+          "chain",
+          "addresses"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/wallet/balance/time",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "bitcoin-mainnet",
+          "base-mainnet",
+          "arb-one-mainnet",
+          "bsc-mainnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "celo-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "get_wallet_portfolio",
+      "description": "Get detailed portfolio of native, fungible, and NFT tokens for a wallet.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "addresses": {
+            "type": "string",
+            "description": "The blockchain public wallet addresses.\nOnly one address is allowed.\n"
+          },
+          "tokenTypes": {
+            "type": "string",
+            "description": "The option to select only specific token types.\nUse [native], [fungible] (ERC-20), [nft,multitoken] (includes ERC-721 and ERC-1155)\n",
+            "enum": [
+              "native",
+              "fungible",
+              "nft,multitoken"
+            ]
+          },
+          "excludeMetadata": {
+            "type": "string",
+            "description": "The option to exclude metadata from the response."
+          },
+          "pageSize": {
+            "type": "string",
+            "description": "The number of items per page (default is 50).",
+            "example": "10"
+          },
+          "offset": {
+            "type": "string",
+            "description": "The offset to obtain next page of the data.",
+            "example": "0"
+          }
+        },
+        "required": [
+          "chain",
+          "addresses",
+          "tokenTypes"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/wallet/portfolio",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "solana-mainnet",
+          "solana-devnet",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "polygon-amoy",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet",
+          "tezos-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "get_owners",
+      "description": "Get all addresses owning a specific NFT, multitoken, or ERC-20.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "The blockchain address of the token (NFT collection or any fungible token).",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenId": {
+            "type": "string",
+            "description": "The ID of a specific NFT token."
+          },
+          "pageSize": {
+            "type": "string",
+            "description": "The number of items per page (default is 50).",
+            "example": "10"
+          },
+          "offset": {
+            "type": "string",
+            "description": "The offset to obtain next page of the data.",
+            "example": "0"
+          }
+        },
+        "required": [
+          "chain",
+          "tokenAddress"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/owners",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "check_owner",
+      "description": "Check if a wallet owns a specific token or NFT.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "address": {
+            "type": "string",
+            "description": "The blockchain address of the wallet.",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "The blockchain address of the token (NFT collection or any fungible token).",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenId": {
+            "type": "string",
+            "description": "The ID of a specific NFT token."
+          }
+        },
+        "required": [
+          "chain",
+          "address",
+          "tokenAddress"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/owners/address",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "get_transaction_history",
+      "description": "Get all transactions for a wallet with optional filters.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "addresses": {
+            "type": "string",
+            "description": "The blockchain public wallet addresses.\nOnly one address is allowed.\n"
+          },
+          "transactionTypes": {
+            "type": "string",
+            "description": "The option to filter transaction based on types.\nIt is possible to enter list of multiple types as a comma separated string.\nUse fungible (ERC-20), nft (ERC-721 and ERC-1155), multitoken (ERC-1155) or native.\n",
+            "enum": [
+              "fungible",
+              "nft",
+              "multitoken",
+              "native"
+            ]
+          },
+          "transactionSubtype": {
+            "type": "string",
+            "description": "The option to filter transaction based on subtype.",
+            "enum": [
+              "incoming",
+              "outgoing",
+              "zero-transfer"
+            ]
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "Address of a token (smart contract).",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenId": {
+            "type": "string",
+            "description": "ID of a token."
+          },
+          "blockFrom": {
+            "type": "string",
+            "description": "Transactions from this block onwards will be included. If blockTo is not specified, it is automatically calculated as blockFrom + 1000."
+          },
+          "blockTo": {
+            "type": "string",
+            "description": "Transactions up to this block will be included. If blockFrom is not specified, it is automatically calculated as blockTo - 1000."
+          },
+          "pageSize": {
+            "type": "string",
+            "description": "The number of items per page (default is 50).",
+            "example": "10"
+          },
+          "offset": {
+            "type": "string",
+            "description": "The offset to obtain next page of the data.",
+            "example": "0"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "The cursor to obtain previous page or next page of the data. Available only for Tezos blockchain."
+          },
+          "sort": {
+            "type": "string",
+            "description": "Sorting of the transactions. ASC - oldest first, DESC - newest first.",
+            "enum": [
+              "ASC",
+              "DESC"
+            ]
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/transaction/history",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "polygon-amoy",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet",
+          "tezos-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "get_block_by_time",
+      "description": "Get block number closest to a given time or timestamp.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "time": {
+            "type": "string",
+            "description": "Time when block is processed."
+          },
+          "unix": {
+            "type": "number",
+            "description": "Unix timestamp when block is processed."
+          }
+        },
+        "required": [
+          "chain"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/block/time",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet"
+        ]
+      }
+    },
+    {
+      "name": "get_tokens",
+      "description": "Get metadata for any token, including NFTs and multitokens.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "chain": {
+            "type": "string",
+            "description": "The blockchain to work with.",
+            "example": "ethereum-mainnet"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "The blockchain address of the token (NFT collection or any fungible token) or 'native' keyword to get information about the native currency of the chain.",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          },
+          "tokenId": {
+            "type": "string",
+            "description": "The ID of a specific NFT token."
+          }
+        },
+        "required": [
+          "chain",
+          "tokenAddress"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v4/data/tokens",
+        "supportedChains": [
+          "ethereum-mainnet",
+          "ethereum-sepolia",
+          "ethereum-holesky",
+          "solana-mainnet",
+          "solana-devnet",
+          "base-mainnet",
+          "base-sepolia",
+          "arb-one-mainnet",
+          "arb-testnet",
+          "bsc-mainnet",
+          "bsc-testnet",
+          "polygon-mainnet",
+          "optimism-mainnet",
+          "optimism-testnet",
+          "celo-mainnet",
+          "celo-testnet",
+          "chiliz-mainnet",
+          "tezos-mainnet"
+        ]
+      }
+    },
+    {
+      "name": "check_malicous_address",
+      "description": "Check if a blockchain address is flagged as malicious.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Blockchain Address to check",
+            "example": "0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623"
+          }
+        },
+        "required": [
+          "address",
+          "address"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v3/security/address/{address}",
+        "supportedChains": []
+      }
+    },
+    {
+      "name": "get_exchange_rate",
+      "description": "Get current exchange rate for crypto or fiat assets.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "currency": {
+            "type": "string",
+            "description": "The fiat or crypto asset to exchange"
+          },
+          "basePair": {
+            "type": "string",
+            "description": "The target fiat asset to get the exchange rate for"
+          }
+        },
+        "required": [
+          "currency",
+          "currency"
+        ]
+      },
+      "endpoint": {
+        "method": "GET",
+        "path": "/v3/tatum/rate/{currency}",
+        "supportedChains": []
+      }
+    }
+  ],
+  "metadata": {
+    "generated": "2025-07-11T11:52:10.242Z",
+    "endpoint_count": 20,
+    "tool_count": 10
+  }
+}
