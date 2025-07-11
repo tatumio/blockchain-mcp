@@ -1,6 +1,7 @@
 import { GatewayFeature, Gateway, GatewayChain } from '../types.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 export class GatewayService {
   private readonly gatewayFeature: GatewayFeature;
@@ -12,14 +13,17 @@ export class GatewayService {
   }
 
   private findGatewayPath(): string {
+    // Get the directory of the current module
+    const currentDir = path.dirname(fileURLToPath(import.meta.url));
+    
     // Try multiple possible locations for gateway.json
     const possiblePaths = [
       // Current working directory (when run from project root)
-      path.join(process.cwd(), 'generated-features', 'gateway.json'),
-      // Relative to the dist directory (when running compiled code)
-      path.join(process.cwd(), 'Documents', 'Technical', 'TatumMCP', 'generated-features', 'gateway.json'),
-      // Absolute path as fallback
-      '/Users/productshiv/Documents/Technical/TatumMCP/generated-features/gateway.json'
+      path.join(process.cwd(), 'features', 'gateway.json'),
+      // Relative to the current module location (handles both src and dist)
+      path.join(currentDir, '..', '..', 'features', 'gateway.json'),
+      // Relative to dist directory (when running compiled version)
+      path.join(currentDir, '..', '..', '..', 'features', 'gateway.json')
     ];
 
     for (const gatewayPath of possiblePaths) {

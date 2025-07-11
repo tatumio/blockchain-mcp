@@ -79,8 +79,5 @@ docker-compose.yml
 .circleci/
 .gitlab-ci.yml
 
-# Features source (keep only generated-features)
-features/
-
 # Keep only essential files for npm package
-# Included: dist/, generated-features/, package.json, README.md, LICENSE
+# Included: dist/, features/, package.json, README.md, LICENSE

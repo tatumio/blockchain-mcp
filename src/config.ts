@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { TatumFeature, TatumIndex, FeatureInfo } from './types.js';
 import { GatewayService } from './services/gateway.js';
 
@@ -20,14 +21,17 @@ export class TatumConfig {
   }
 
   private findFeaturesPath(): string {
-    // Try multiple possible locations for generated-features directory
+    // Get the directory of the current module
+    const currentDir = path.dirname(fileURLToPath(import.meta.url));
+    
+    // Try multiple possible locations for features directory
     const possiblePaths = [
       // Current working directory (when run from project root)
-      path.join(process.cwd(), 'generated-features'),
-      // Relative to the dist directory (when running compiled code)
-      path.join(process.cwd(), 'Documents', 'Technical', 'TatumMCP', 'generated-features'),
-      // Absolute path as fallback
-      '/Users/productshiv/Documents/Technical/TatumMCP/generated-features'
+      path.join(process.cwd(), 'features'),
+      // Relative to the current module location (handles both src and dist)
+      path.join(currentDir, '..', 'features'),
+      // Relative to dist directory (when running compiled version)
+      path.join(currentDir, '..', '..', 'features')
     ];
 
     for (const featuresPath of possiblePaths) {
@@ -38,7 +42,7 @@ export class TatumConfig {
     }
 
     // If none found, use the first option and let it fail with a clear error
-    console.error(`Warning: Could not find generated-features directory. Tried paths:`);
+    console.error(`Warning: Could not find features directory. Tried paths:`);
     possiblePaths.forEach(p => console.error(`  - ${p}`));
     return possiblePaths[0];
   }

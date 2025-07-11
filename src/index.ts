@@ -30,7 +30,7 @@ class TatumMCPServer {
     // Gateway tools will be initialized when API client is ready
     this.server = new Server(
       {
-        name: 'tatum-mcp-server',
+        name: '@tatum/blockchain-mcp"',
         version: '1.0.0',
       },
       {
@@ -161,8 +161,6 @@ class TatumMCPServer {
     }
     return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
   }
-
-
 
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {

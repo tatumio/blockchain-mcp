@@ -1,4 +1,4 @@
-# Tatum MCP Server
+# Blockchain MCP
 
 [![npm version](https://badge.fury.io/js/tatum-mcp-server.svg)](https://badge.fury.io/js/tatum-mcp-server)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -79,6 +79,7 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 ```
 
 **Benefits of Custom RPC URLs:**
+
 - Use your preferred RPC providers
 - No authentication required for your custom endpoints
 - Potentially better performance or reliability
@@ -87,6 +88,7 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 ## 🛠️ Available Tools
 
 ### Blockchain Data (10 tools)
+
 - Get wallet balances and portfolios
 - Query transaction history
 - Retrieve block information
@@ -96,6 +98,7 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 - Check Malicious Address
 
 ### RPC Gateways (3 tools)
+
 - Execute RPC calls on any supported chain
 - Get supported blockchain networks
 - Direct gateway URL access
@@ -103,6 +106,7 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 ## 🌐 Supported Networks
 
 ### EVM-Compatible (69 networks)
+
 - **Ethereum**: Mainnet, Sepolia, Holesky
 - **Layer 2**: Polygon, Arbitrum, Optimism, Base
 - **Sidechains**: BSC, Avalanche, Fantom
@@ -111,6 +115,7 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 - **And many more...**
 
 ### Non-EVM (61 networks)
+
 - **Bitcoin**: Mainnet, Testnet, Signet
 - **Alternative Coins**: Litecoin, Dogecoin, Bitcoin Cash
 - **Smart Contract Platforms**: Solana, Cardano, Tezos
@@ -128,16 +133,19 @@ export BYO_RPC_CONFIG="ethereum-mainnet,https://eth.llamarpc.com;polygon-mainnet
 ```
 
 For a single chain:
+
 ```bash
 export BYO_RPC_CONFIG="ethereum-mainnet,https://eth.llamarpc.com"
 ```
 
 **Format**: `chain1,url1;chain2,url2;chain3,url3`
+
 - Use commas (`,`) to separate chain name from URL
 - Use semicolons (`;`) to separate multiple chain configurations
 - No spaces around separators (they will be trimmed automatically)
 
 **Supported Chain Names:**
+
 - Use the same chain identifiers as Tatum (e.g., `ethereum-mainnet`, `polygon-mainnet`, `bsc-mainnet`)
 - Custom RPC URLs will override Tatum's gateway URLs for those specific chains
 - Authentication headers are not sent to custom RPC endpoints
@@ -169,6 +177,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 Tatum is a blockchain development platform that provides APIs, SDKs, and tools for building blockchain applications. Learn more at [tatum.io](https://tatum.io).
 
 ---
+
 **Made with ❤️ by the Tatum team**
 
 ## License
@@ -178,6 +187,7 @@ MIT
 ## Support
 
 For issues and questions:
+
 - [Tatum Documentation](https://docs.tatum.io)
 - [Tatum Discord](https://discord.gg/tatum)
 - [GitHub Issues](https://github.com/your-repo/issues)
