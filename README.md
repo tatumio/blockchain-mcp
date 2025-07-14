@@ -7,7 +7,7 @@
 
 A Model Context Protocol (MCP) server providing access to Tatum's blockchain API across **130+ networks** with **tools** including RPC Gateway and Blockchain Data insights.
 
-[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=tatumio&config=JTdCJTIyY29tbWFuZCUyMiUzQSUyMm5weCUyMC15JTIwJTQwdGF0dW1pbyUyRmJsb2NrY2hhaW4tbWNwJTIyJTJDJTIyZW52JTIyJTNBJTdCJTIyVEFUVU1fQVBJX0tFWSUyMiUzQSUyMllPVVJfQVBJX0tFWSUyMiU3RCU3RA%3D%3D)
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=tatum&config=eyJjb21tYW5kIjoibnB4IC15IHRhdHVtLW1jcC1zZXJ2ZXIiLCJlbnYiOnsiVEFUVU1fQVBJX0tFWSI6IllvdXIgVGF0dW0gS2V5In19)
 
 ## 🚀 Features
 
