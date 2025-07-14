@@ -1,15 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { TatumApiResponse, ToolExecutionContext } from './types.js';
-import { TatumConfig } from './config.js';
 
 export class TatumApiClient {
   private readonly client: AxiosInstance;
   private readonly context: ToolExecutionContext;
-  private readonly config: TatumConfig;
 
   constructor(context: ToolExecutionContext) {
     this.context = context;
-    this.config = TatumConfig.getInstance();
     this.client = axios.create({
       baseURL: context.baseUrl,
       timeout: context.timeout,
@@ -23,21 +20,14 @@ export class TatumApiClient {
   }
 
   private setupInterceptors(): void {
-    this.client.interceptors.request.use(
-      (config) => {
-        console.error(`[API Request] ${config.method?.toUpperCase()} ${config.url}`);
-        return config;
-      },
-      (error) => Promise.reject(error instanceof Error ? error : new Error(String(error)))
-    );
-
+    // Response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => {
-        console.error(`[API Response] ${response.status} ${response.statusText}`);
-        return response;
-      },
+      (response) => response,
       (error) => {
-        console.error('[API Response Error]', error.response?.status, error.response?.statusText);
+        // Only log server errors (5xx), not client errors or network issues
+        if (error.response?.status >= 500) {
+          console.error('API server error:', error.response?.status, error.response?.statusText);
+        }
         return Promise.reject(error instanceof Error ? error : new Error(String(error)));
       }
     );
@@ -76,7 +66,6 @@ export class TatumApiClient {
         statusText: response.statusText
       };
     } catch (error: any) {
-      console.error(`API request failed: ${method} ${path}`, error.message);
       return {
         error: error.response?.data?.message ?? error.response?.statusText ?? error.message ?? 'Request failed',
         status: error.response?.status ?? 0,
@@ -115,71 +104,4 @@ export class TatumApiClient {
     return url;
   }
 
-  public async testConnection(): Promise<boolean> {
-    try {
-      const response = await this.executeRequest('GET', '/v4/data/supported-chains');
-      return response.status >= 200 && response.status < 500;
-    } catch (error) {
-      console.error('Connection test failed:', error);
-      return false;
-    }
-  }
-
-  public async executeRpcCall(chain: string, method: string, params: any[] = []): Promise<TatumApiResponse> {
-    if (!chain || !method) {
-      return {
-        error: 'Chain and method are required',
-        status: 400,
-        statusText: 'Bad Request'
-      };
-    }
-
-    const gatewayUrl = this.config.getGatewayUrl(chain);
-    if (!gatewayUrl) {
-      return {
-        error: `Gateway URL not found for chain: ${chain}`,
-        status: 400,
-        statusText: 'Bad Request'
-      };
-    }
-
-    const isCustomRpc = this.config.hasCustomRpcUrl(chain);
-    
-    try {
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-      
-      if (!isCustomRpc) {
-        headers['X-API-Key'] = this.context.apiKey;
-      }
-
-      const response = await this.client.post(
-        gatewayUrl,
-        {
-          jsonrpc: '2.0',
-          id: 1,
-          method,
-          params
-        },
-        {
-          headers,
-          baseURL: ''
-        }
-      );
-
-      return {
-        data: response.data,
-        status: response.status,
-        statusText: response.statusText
-      };
-    } catch (error: any) {
-      console.error(`RPC call failed: ${method} on ${chain}`, error.message);
-      return {
-        error: error.response?.data?.error?.message ?? error.response?.data?.message ?? error.response?.statusText ?? error.message ?? 'RPC call failed',
-        status: error.response?.status ?? 0,
-        statusText: error.response?.statusText ?? 'Error'
-      };
-    }
-  }
 }

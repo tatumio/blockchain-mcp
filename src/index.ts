@@ -13,24 +13,35 @@ import * as dotenv from 'dotenv';
 import { TatumConfig } from './config.js';
 import { TatumApiClient } from './api-client.js';
 import { ToolExecutionContext } from './types.js';
-import { GatewayTools } from './tools/gateway-tools.js';
+import { GatewayService, GATEWAY_TOOLS } from './services/gateway.js';
 
-
-// Load environment variables
-dotenv.config();
+// Inline environment validation functions
+function validateEnvironment(): void {
+  const missing = ['TATUM_API_KEY'].filter(env => !process.env[env]);
+  
+  if (missing.length > 0) {
+    console.error([
+      'Missing required environment variables:',
+      ...missing.map(env => `   - ${env}`),
+      '',
+      'Get your API key at: https://dashboard.tatum.io',
+      'Set it using: export TATUM_API_KEY="your-api-key"',
+      'Or use CLI: npx @tatum/blockchain-mcp --api-key your-api-key'
+    ].join('\n'));
+    process.exit(1);
+  }
+}
 
 class TatumMCPServer {
   private readonly server: Server;
-  private readonly config: TatumConfig;
+  private config?: TatumConfig;
   private apiClient?: TatumApiClient;
-  private gatewayTools?: GatewayTools;
+  private gatewayService?: GatewayService;
 
   constructor() {
-    this.config = TatumConfig.getInstance();
-    // Gateway tools will be initialized when API client is ready
     this.server = new Server(
       {
-        name: '@tatum/blockchain-mcp"',
+        name: '@tatum/blockchain-mcp',
         version: '1.0.0',
       },
       {
@@ -54,72 +65,47 @@ class TatumMCPServer {
     };
   }
 
-  private async handleGatewayTool(name: string, args: any) {
-    try {
-      this.gatewayTools ??= new GatewayTools();
-      
-      const result = await this.executeGatewayTool(name, args);
-      
-      const formattedResult = this.formatResponseData(result);
-      
-      return this.buildResponse({
-        success: true,
-        data: formattedResult,
-        error: null,
-        status: 200,
-        endpoint: null
-      });
-    } catch (error) {
-      return this.buildResponse({
-        success: false,
-        data: null,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        status: 500
-      });
-    }
-  }
-
   private async executeGatewayTool(name: string, args: any): Promise<any> {
+    // Initialize gateway service if needed
+    if (!this.gatewayService) {
+      const apiKey = process.env.TATUM_API_KEY;
+      this.gatewayService = new GatewayService(apiKey);
+      await this.gatewayService.initialize();
+    }
+
     switch (name) {
       case 'gateway_get_supported_chains':
-        return await this.gatewayTools!.getSupportedChains();
-
-      case 'gateway_get_url':
-        if (!args?.chain) {
-          throw new Error('Chain parameter is required');
-        }
-        return await this.gatewayTools!.getGatewayUrl(args.chain as string);
-
+        return await this.gatewayService.getSupportedChains();
+      
       case 'gateway_get_supported_methods':
-        if (!args?.chain) {
-          throw new Error('Chain parameter is required');
+        if (!args.gatewayUrl) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: gatewayUrl');
         }
-        return await this.gatewayTools!.getSupportedMethods(args.chain as string);
-
+        return await this.gatewayService.getAvailableMethods(args.gatewayUrl);
+      
       case 'gateway_execute_rpc':
-        if (!args?.chain || !args?.method) {
-          throw new Error('Chain and method parameters are required');
+        if (!args.chain || !args.method) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, method');
         }
-        return await this.gatewayTools!.executeRpcCall(
-          args.chain as string,
-          args.method as string,
-          (args.params as any[]) ?? []
-        );
-
+        const gatewayUrl = await this.gatewayService.getGatewayUrl(args.chain);
+        if (!gatewayUrl) {
+          throw new McpError(ErrorCode.InvalidParams, `Gateway URL not found for chain: ${args.chain}`);
+        }
+        return await this.gatewayService.executeRequest({
+          gatewayUrl,
+          method: args.method,
+          body: args.params || []
+        });
+      
       default:
-        throw new Error(`Unknown gateway tool: ${name}`);
+        throw new McpError(ErrorCode.MethodNotFound, `Unknown gateway tool: ${name}`);
     }
   }
 
-  private async handleRegularTool(name: string, args: any) {
-    const toolInfo = this.config.findToolByName(name);
+  private async executeRegularTool(name: string, args: any) {
+    const toolInfo = this.config!.findToolByName(name);
     if (!toolInfo) {
       throw new McpError(ErrorCode.InvalidRequest, `Tool ${name} not found`);
-    }
-
-    const feature = this.config.getFeature(toolInfo.featureId);
-    if (!feature) {
-      throw new McpError(ErrorCode.InternalError, `Feature ${toolInfo.featureId} not found`);
     }
 
     const endpoint = toolInfo.tool.endpoint;
@@ -164,27 +150,53 @@ class TatumMCPServer {
 
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      const allTools = this.config.getAllTools();
-      
-      return {
-        tools: allTools.map(({ featureId, tool }) => ({
+      // Combine regular tools from config with gateway tools
+      const regularTools = this.config!.getAllTools();
+      const allTools = [
+        ...regularTools.map(({ featureId, tool }) => ({
           name: tool.name,
           description: `[${featureId}] ${tool.description}`,
           inputSchema: tool.parameters
+        })),
+        ...GATEWAY_TOOLS.map(tool => ({
+          name: tool.name,
+          description: `[gateway] ${tool.description}`,
+          inputSchema: tool.inputSchema
         }))
-      };
+      ];
+      
+      return { tools: allTools };
     });
 
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
 
-      this.apiClient ??= await this.initializeApiClient();
-
-      if (name.startsWith('gateway_')) {
-        return this.handleGatewayTool(name, args);
+      try {
+        let result;
+        
+        if (name.startsWith('gateway_')) {
+          // Handle gateway tools
+          result = await this.executeGatewayTool(name, args);
+          return this.buildResponse({
+            success: true,
+            data: this.formatResponseData(result),
+            error: null,
+            status: 200,
+            endpoint: null
+          });
+        } else {
+          // Handle regular tools
+          this.apiClient ??= await this.initializeApiClient();
+          return await this.executeRegularTool(name, args);
+        }
+      } catch (error) {
+        return this.buildResponse({
+          success: false,
+          data: null,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          status: 500
+        });
       }
-
-      return this.handleRegularTool(name, args);
     });
   }
 
@@ -198,37 +210,42 @@ class TatumMCPServer {
       );
     }
 
-    const apiConfig = this.config.getApiConfig();
     const context: ToolExecutionContext = {
       apiKey,
-      baseUrl: apiConfig.baseUrl,
-      timeout: apiConfig.timeout,
-      retryAttempts: apiConfig.retryAttempts
+      baseUrl: 'https://api.tatum.io',
+      timeout: 30000,
+      retryAttempts: 3
     };
 
     const client = new TatumApiClient(context);
     
-    const isConnected = await client.testConnection();
-    if (!isConnected) {
-      console.warn('Warning: API connection test failed. Tools may not work properly.');
-    }
-
-    this.gatewayTools ??= new GatewayTools();
     return client;
   }
 
   public async start(): Promise<void> {
+    // Initialize config
+    console.error('Starting Tatum MCP Server...');
+    
+    this.config = new TatumConfig();
+    
     const transport = new StdioServerTransport();
     
-    console.error('Starting Tatum MCP Server...');
-    console.error(`Loaded ${this.config.getAllTools().length} tools from ${this.config.getAllFeatures().size} features`);
+    const regularToolCount = this.config.getAllTools().length;
+    const totalToolCount = regularToolCount + GATEWAY_TOOLS.length;
+    console.error(`Loaded ${totalToolCount} tools (${regularToolCount} regular + ${GATEWAY_TOOLS.length} gateway)`);
     
     await this.server.connect(transport);
-    console.error('Tatum MCP Server started successfully');
+    console.error('Tatum MCP Server ready');
   }
 }
 
 async function main(): Promise<void> {
+  // Load environment variables first
+  dotenv.config();
+  
+  // Validate environment before starting server
+  validateEnvironment();
+  
   try {
     const server = new TatumMCPServer();
     await server.start();

@@ -22,18 +22,19 @@ Usage:
 
 Options:
   --api-key <key>     Set Tatum API key
-  --port <port>       Set server port (default: 3000)
   --help, -h          Show this help message
   --version, -v       Show version
 
 Environment Variables:
-  TATUM_API_KEY       Tatum API key
-  PORT                Server port
+  TATUM_API_KEY       Tatum API key (required)
 
 Examples:
   tatum-mcp --api-key your-api-key
-  tatum-mcp --port 8080
   TATUM_API_KEY=your-key tatum-mcp
+
+This MCP server provides 14 tools for blockchain operations:
+  • 10 Blockchain Data tools (balances, transactions, NFTs, etc.)
+  • 4 RPC Gateway tools (direct blockchain access)
 
 For more information, visit: https://docs.tatum.io
 `);
@@ -77,16 +78,6 @@ function parseArguments(args: string[], env: Record<string, string | undefined>)
                 }
                 break;
                 
-            case '--port':
-                if (i + 1 < args.length) {
-                    env.PORT = args[i + 1];
-                    i += 2; // Skip current and next argument
-                } else {
-                    console.error('Error: --port requires a value');
-                    process.exit(1);
-                }
-                break;
-                
             default:
                 if (arg.startsWith('-')) {
                     console.error(`Error: Unknown option ${arg}`);
@@ -120,9 +111,6 @@ function main() {
     // All output to stderr to avoid interfering with MCP JSON protocol
     console.error('Starting Tatum MCP Server...');
     console.error(`API Key: ${env.TATUM_API_KEY.substring(0, 8)}...`);
-    if (env.PORT) {
-        console.error(`Port: ${env.PORT}`);
-    }
     console.error('');
     
     const child = spawn('node', [serverPath], {
@@ -141,7 +129,7 @@ function main() {
     
     // Handle graceful shutdown
     process.on('SIGINT', () => {
-        console.error('\nShutting down Tatum MCP Server...');
+        console.error('Shutting down Tatum MCP Server...');
         child.kill('SIGINT');
     });
     

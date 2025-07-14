@@ -1,32 +1,30 @@
-# Blockchain MCP
+# Blockchain MCP powered by Tatum
 
-[![npm version](https://badge.fury.io/js/tatum-mcp-server.svg)](https://badge.fury.io/js/tatum-mcp-server)
+[![npm version](https://badge.fury.io/js/@tatum/blockchain-mcp.svg)](https://badge.fury.io/js/@tatum/blockchain-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server providing access to Tatum's comprehensive blockchain API across **130+ networks** with **13 tools** including the gateways (access to rpc) & data insights api
+A Model Context Protocol (MCP) server providing access to Tatum's comprehensive blockchain API across **130+ networks** with **14 tools** including RPC gateways and blockchain data insights.
 
 ## 🚀 Features
 
 - **130+ Blockchain Networks**: Bitcoin, Ethereum, Polygon, Arbitrum, Base, Avalanche, and many more
 - **13 Tools**: Comprehensive blockchain operations
 - **2 Feature Categories**:
-  - 🔗 **Blockchain Data**: Blocks, transactions, balances, network info
-  - **RPC Gateways**: Direct access to blockchain RPC endpoints
-- **TypeScript**: Full type safety and IntelliSense support
-- **ES Modules**: Modern JavaScript module system
+  - 🔗 **Blockchain Data**: Blocks, transactions, balances, network info (10 tools)
+  - 🌐 **RPC Gateways**: Direct access to blockchain RPC endpoints (3 tools)
 
 ## 📦 Installation
 
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g tatum-mcp-server
+npm install -g @tatum/blockchain-mcp
 ```
 
 ### Local Installation
 
 ```bash
-npm install tatum-mcp-server
+npm install @tatum/blockchain-mcp
 ```
 
 ## 🔑 Getting Started
@@ -39,15 +37,13 @@ Get your free API key from [Tatum Dashboard](https://dashboard.tatum.io).
 
 Add this server to your MCP client configuration:
 
-#### Basic Configuration
-
 ```json
 {
   "mcpServers": {
     "tatum": {
       "command": "npx",
       "args": [
-        "tatum-mcp-server"
+        "@tatum/blockchain-mcp"
       ],
       "env": {
         "TATUM_API_KEY": "YOUR_API_KEY"
@@ -57,51 +53,26 @@ Add this server to your MCP client configuration:
 }
 ```
 
-#### With Custom RPC URLs (Bring Your Own RPC)
-
-You can override Tatum's gateway URLs with your own RPC endpoints:
-
-```json
-{
-  "mcpServers": {
-    "tatum": {
-      "command": "npx",
-      "args": [
-        "tatum-mcp-server"
-      ],
-      "env": {
-        "TATUM_API_KEY": "YOUR_API_KEY",
-        "BYO_RPC_CONFIG": "{\"ethereum-mainnet\": \"https://ethereum-rpc.publicnode.com\", \"polygon-mainnet\": \"https://polygon-rpc.com\"}"
-      }
-    }
-  }
-}
-```
-
-**Benefits of Custom RPC URLs:**
-
-- Use your preferred RPC providers
-- No authentication required for your custom endpoints
-- Potentially better performance or reliability
-- Support for private or enterprise RPC endpoints
-
 ## 🛠️ Available Tools
 
 ### Blockchain Data (10 tools)
 
-- Get wallet balances and portfolios
-- Query transaction history
-- Retrieve block information
-- Access NFT and token metadata
-- Check token ownership
-- Fetch Real Time Exchange Rates
-- Check Malicious Address
+- **get_metadata** - Fetch NFT/multitoken metadata by address and IDs
+- **get_wallet_balance_by_time** - Get wallet balance at specific time
+- **get_wallet_portfolio** - Get comprehensive wallet portfolio
+- **get_owners** - Get owners of NFT/token
+- **check_owner** - Check if address owns specific token
+- **get_transaction_history** - Get transaction history for address
+- **get_block_by_time** - Get block information by timestamp
+- **get_tokens** - Get tokens for specific wallet
+- **check_malicous_address** - Check if address is malicious
+- **get_exchange_rate** - Get real-time exchange rates
 
-### RPC Gateways (3 tools)
+### RPC Gateways (4 tools)
 
-- Execute RPC calls on any supported chain
-- Get supported blockchain networks
-- Direct gateway URL access
+- **gateway_get_supported_chains** - Get all supported blockchain networks
+- **gateway_get_supported_methods** - Get supported RPC methods for chain
+- **gateway_execute_rpc** - Execute RPC calls on any supported chain
 
 ## 🌐 Supported Networks
 
@@ -122,34 +93,6 @@ You can override Tatum's gateway URLs with your own RPC endpoints:
 - **Enterprise**: Stellar, Ripple, EOS
 - **And many more...**
 
-## 🔧 Configuration
-
-#### BYO_RPC_CONFIG Format
-
-The `BYO_RPC_CONFIG` environment variable uses a simple comma-separated format:
-
-```bash
-export BYO_RPC_CONFIG="ethereum-mainnet,https://eth.llamarpc.com;polygon-mainnet,https://polygon.llamarpc.com"
-```
-
-For a single chain:
-
-```bash
-export BYO_RPC_CONFIG="ethereum-mainnet,https://eth.llamarpc.com"
-```
-
-**Format**: `chain1,url1;chain2,url2;chain3,url3`
-
-- Use commas (`,`) to separate chain name from URL
-- Use semicolons (`;`) to separate multiple chain configurations
-- No spaces around separators (they will be trimmed automatically)
-
-**Supported Chain Names:**
-
-- Use the same chain identifiers as Tatum (e.g., `ethereum-mainnet`, `polygon-mainnet`, `bsc-mainnet`)
-- Custom RPC URLs will override Tatum's gateway URLs for those specific chains
-- Authentication headers are not sent to custom RPC endpoints
-
 ## 📖 Documentation
 
 - [Tatum API Documentation](https://docs.tatum.io)
@@ -169,7 +112,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - [Documentation](https://docs.tatum.io)
 - [Discord Community](https://discord.gg/tatum)
-- [GitHub Issues](https://github.com/tatumio/tatum-mcp-server/issues)
+- [GitHub Issues](https://github.com/tatumio/blockchain-mcp/issues)
 - [Email Support](mailto:support@tatum.io)
 
 ## 🏢 About Tatum
@@ -179,15 +122,3 @@ Tatum is a blockchain development platform that provides APIs, SDKs, and tools f
 ---
 
 **Made with ❤️ by the Tatum team**
-
-## License
-
-MIT
-
-## Support
-
-For issues and questions:
-
-- [Tatum Documentation](https://docs.tatum.io)
-- [Tatum Discord](https://discord.gg/tatum)
-- [GitHub Issues](https://github.com/your-repo/issues)

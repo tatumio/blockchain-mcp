@@ -20,24 +20,6 @@ export interface TatumFeature {
   };
 }
 
-export interface TatumEndpoint {
-  id: string;
-  method: string;
-  path: string;
-  description: string;
-  credits: number;
-  supportedChains: string[];
-  parameters: TatumParameter[];
-}
-
-export interface TatumParameter {
-  name: string;
-  type: string;
-  required: boolean;
-  description: string;
-  in: string;
-}
-
 export interface TatumTool {
   name: string;
   description: string;
@@ -45,56 +27,6 @@ export interface TatumTool {
     type: string;
     properties: Record<string, any>;
     required: string[];
-  };
-}
-
-export interface TatumIndex {
-  tatumMCP: {
-    name: string;
-    description: string;
-    version: string;
-    baseUrl: string;
-    documentation: string;
-    supportedProtocols: string[];
-    authentication: {
-      type: string;
-      header: string;
-      required: boolean;
-      documentation: string;
-    };
-  };
-  features: FeatureInfo[];
-  statistics: {
-    totalTools: number;
-    totalEndpoints: number;
-    totalBlockchains: number;
-    totalFeatures: number;
-    lastUpdated: string;
-    generatedFrom: string;
-  };
-  configuration: {
-    defaultTimeout: number;
-    retryAttempts: number;
-    rateLimit: {
-      requestsPerSecond: number;
-      burstLimit: number;
-    };
-  };
-}
-
-export interface FeatureInfo {
-  id: string;
-  file: string;
-  name: string;
-  category: string;
-  description: string;
-  toolCount: number;
-  endpointCount: number;
-  supportedBlockchains: number;
-  enabled: boolean;
-  credits: {
-    min: number;
-    max: number;
   };
 }
 
@@ -143,4 +75,34 @@ export interface GatewayFeature {
     source_url: string;
     gateway_count: number;
   };
+}
+
+// New types for external blockchain data from https://blockchains.tatum.io/blockchains.json
+export interface ExternalBlockchainChain {
+  archive: boolean;
+  chain: string;
+  explorer?: string;
+  gatewayName: string;
+  gatewayUrl: string;
+  slugAliases: string[];
+  tier: number;
+}
+
+export interface ExternalBlockchain {
+  chains: ExternalBlockchainChain[];
+  description: string;
+  docs: string;
+  excerpt: string;
+  icon: string;
+  id: string;
+  name: string;
+  public: boolean;
+  sdk: {
+    interface: string[];
+    network: string[];
+  };
+  tags: string[];
+  tier: number;
+  type: string;
+  website: string;
 }
