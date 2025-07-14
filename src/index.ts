@@ -26,7 +26,7 @@ function validateEnvironment(): void {
       '',
       'Get your API key at: https://dashboard.tatum.io',
       'Set it using: export TATUM_API_KEY="your-api-key"',
-      'Or use CLI: npx @tatum/blockchain-mcp --api-key your-api-key'
+      'Or use CLI: npx @tatumio/blockchain-mcp --api-key your-api-key'
     ].join('\n'));
     process.exit(1);
   }
@@ -41,7 +41,7 @@ class TatumMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: '@tatum/blockchain-mcp',
+        name: '@tatumio/blockchain-mcp',
         version: '1.0.0',
       },
       {

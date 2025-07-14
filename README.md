@@ -2,7 +2,7 @@
 
 [![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![NPM Version](https://img.shields.io/npm/v/%40tatum%2Fblockchain-mcp)](https://www.npmjs.com/package/@tatumio/blockchain-mcp)
+[![NPM Version](https://img.shields.io/npm/v/%40tatumio%2Fblockchain-mcp)](https://www.npmjs.com/package/@tatumio/blockchain-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
@@ -21,13 +21,13 @@ A Model Context Protocol (MCP) server providing access to Tatum's comprehensive 
 ### Global Installation (Recommended)
 
 ```bash
-npm install -g @tatum/blockchain-mcp
+npm install -g @tatumio/blockchain-mcp
 ```
 
 ### Local Installation
 
 ```bash
-npm install @tatum/blockchain-mcp
+npm install @tatumio/blockchain-mcp
 ```
 
 ## 🔑 Getting Started
@@ -43,10 +43,10 @@ Add this server to your MCP client configuration:
 ```json
 {
   "mcpServers": {
-    "tatum": {
+    "tatumio": {
       "command": "npx",
       "args": [
-        "@tatum/blockchain-mcp"
+        "@tatumio/blockchain-mcp"
       ],
       "env": {
         "TATUM_API_KEY": "YOUR_API_KEY"
@@ -86,7 +86,6 @@ Add this server to your MCP client configuration:
 - **Sidechains**: BSC, Avalanche, Fantom
 - **Enterprise**: Celo, Palm, Gnosis
 - **Gaming**: Ronin, Chiliz
-- **And many more...**
 
 ### Non-EVM (61 networks)
 
@@ -94,7 +93,6 @@ Add this server to your MCP client configuration:
 - **Alternative Coins**: Litecoin, Dogecoin, Bitcoin Cash
 - **Smart Contract Platforms**: Solana, Cardano, Tezos
 - **Enterprise**: Stellar, Ripple, EOS
-- **And many more...**
 
 ## 📖 Documentation
 
@@ -103,21 +101,11 @@ Add this server to your MCP client configuration:
 - [Blockchain Networks](https://docs.tatum.io/docs/supported-blockchains)
 - [API Reference](https://docs.tatum.io/reference)
 
-## 🤝 Contributing
 
-Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-- [Documentation](https://docs.tatum.io)
-- [Discord Community](https://discord.gg/tatum)
-- [GitHub Issues](https://github.com/tatumio/blockchain-mcp/issues)
-- [Email Support](mailto:support@tatum.io)
-
 ## 🏢 About Tatum
 
 Tatum is a blockchain development platform that provides APIs, SDKs, and tools for building blockchain applications. Learn more at [tatum.io](https://tatum.io).

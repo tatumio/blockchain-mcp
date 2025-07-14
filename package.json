@@ -1,6 +1,6 @@
 {
-  "name": "@tatum/blockchain-mcp",
-  "version": "1.0.0",
+  "name": "@tatumio/blockchain-mcp",
+  "version": "1.0.2",
   "description": "Model Context Protocol server providing access to Tatum's comprehensive blockchain API across 130+ networks with 13 tools",
   "type": "module",
   "main": "dist/index.js",
