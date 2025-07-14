@@ -1,7 +1,10 @@
 # Blockchain MCP powered by Tatum
 
-[![npm version](https://badge.fury.io/js/@tatum/blockchain-mcp.svg)](https://badge.fury.io/js/@tatum/blockchain-mcp)
+[![MCP](https://img.shields.io/badge/MCP-Model%20Context%20Protocol-blue)](https://modelcontextprotocol.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![NPM Version](https://img.shields.io/npm/v/%40tatum%2Fblockchain-mcp)](https://www.npmjs.com/package/@tatumio/blockchain-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 
 A Model Context Protocol (MCP) server providing access to Tatum's comprehensive blockchain API across **130+ networks** with **14 tools** including RPC gateways and blockchain data insights.
 
