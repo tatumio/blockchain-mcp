@@ -17,12 +17,13 @@ export const GATEWAY_TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        gatewayUrl: {
+        chain: {
           type: 'string',
-          description: 'The gateway URL to get methods for'
+          description: "The blockchain network identifier. Examples: 'bitcoin-mainnet', 'ethereum-mainnet', 'litecoin-mainnet', 'polygon-mainnet', 'tron-mainnet', 'bsc-mainnet', 'solana-mainnet'. Use gateway_get_supported_chains to see all available networks.",
+          examples: ['bitcoin-mainnet', 'ethereum-mainnet', 'litecoin-mainnet', 'polygon-mainnet', 'solana-mainnet']
         }
       },
-      required: ['gatewayUrl']
+      required: ['chain']
     }
   },
   {

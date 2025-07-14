@@ -78,10 +78,14 @@ class TatumMCPServer {
         return await this.gatewayService.getSupportedChains();
       
       case 'gateway_get_supported_methods':
-        if (!args.gatewayUrl) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: gatewayUrl');
+        if (!args.chain) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: chain');
         }
-        return await this.gatewayService.getAvailableMethods(args.gatewayUrl);
+        const methodsGatewayUrl = await this.gatewayService.getGatewayUrl(args.chain);
+        if (!methodsGatewayUrl) {
+          throw new McpError(ErrorCode.InvalidParams, `Gateway URL not found for chain: ${args.chain}`);
+        }
+        return await this.gatewayService.getAvailableMethods(methodsGatewayUrl);
       
       case 'gateway_execute_rpc':
         if (!args.chain || !args.method) {
