@@ -5,16 +5,15 @@
 [![NPM Version](https://img.shields.io/npm/v/%40tatumio%2Fblockchain-mcp)](https://www.npmjs.com/package/@tatumio/blockchain-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+A Model Context Protocol (MCP) server providing access to Tatum's blockchain API across **130+ networks** with **tools** including RPC Gateway and Blockchain Data insights.
 
-A Model Context Protocol (MCP) server providing access to Tatum's comprehensive blockchain API across **130+ networks** with **14 tools** including RPC gateways and blockchain data insights.
+[![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/install-mcp?name=tatumio&config=JTdCJTIyY29tbWFuZCUyMiUzQSUyMm5weCUyMC15JTIwJTQwdGF0dW1pbyUyRmJsb2NrY2hhaW4tbWNwJTIyJTJDJTIyZW52JTIyJTNBJTdCJTIyVEFUVU1fQVBJX0tFWSUyMiUzQSUyMllPVVJfQVBJX0tFWSUyMiU3RCU3RA%3D%3D)
 
 ## 🚀 Features
 
 - **130+ Blockchain Networks**: Bitcoin, Ethereum, Polygon, Arbitrum, Base, Avalanche, and many more
-- **13 Tools**: Comprehensive blockchain operations
-- **2 Feature Categories**:
-  - 🔗 **Blockchain Data**: Blocks, transactions, balances, network info (10 tools)
-  - 🌐 **RPC Gateways**: Direct access to blockchain RPC endpoints (3 tools)
+- 🔗 **Blockchain Data**: Blocks, transactions, balances, network info
+- 🌐 **RPC Gateway**: Direct access to blockchain RPC endpoints
 
 ## 📦 Installation
 
