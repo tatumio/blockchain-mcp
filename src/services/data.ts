@@ -287,19 +287,14 @@ export const DATA_TOOLS = [
   },
   {
     name: 'get_exchange_rate',
-    description: 'Get current exchange rate for a specific token or native currency.',
+    description: 'Get current exchange rate for a specific cryptocurrency symbol.',
     inputSchema: {
       type: 'object',
       properties: {
-        chain: {
+        symbol: {
           type: 'string',
-          description: 'The blockchain to work with.',
-          example: 'ethereum-mainnet'
-        },
-        tokenAddress: {
-          type: 'string',
-          description: 'The blockchain address of the token or \'native\' for native currency.',
-          example: 'native'
+          description: 'The cryptocurrency symbol to get exchange rate for.',
+          example: 'ETH'
         },
         basePair: {
           type: 'string',
@@ -307,7 +302,7 @@ export const DATA_TOOLS = [
           example: 'USD'
         }
       },
-      required: ['chain', 'tokenAddress', 'basePair']
+      required: ['symbol', 'basePair']
     }
   }
 ];
@@ -366,7 +361,7 @@ export class DataService {
   }
 
   async checkOwner(args: any): Promise<any> {
-    const url = `/v4/data/owners/check`;
+    const url = `/v4/data/owners/address`;
     const parameters: any = {
       chain: args.chain,
       address: args.address,
@@ -429,10 +424,8 @@ export class DataService {
   }
 
   async getExchangeRate(args: any): Promise<any> {
-    const url = `/v4/data/exchange-rate`;
+    const url = `/v3/tatum/rate/${args.symbol}`;
     const parameters = {
-      chain: args.chain,
-      tokenAddress: args.tokenAddress,
       basePair: args.basePair
     };
     

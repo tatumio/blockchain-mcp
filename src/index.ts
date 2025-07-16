@@ -170,8 +170,8 @@ class TatumMCPServer {
         return await this.dataService.checkMaliciousAddress(args);
       
       case 'get_exchange_rate':
-        if (!args.chain || !args.tokenAddress || !args.basePair) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, tokenAddress, basePair');
+        if (!args.symbol || !args.basePair) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: symbol, basePair');
         }
         return await this.dataService.getExchangeRate(args);
       
