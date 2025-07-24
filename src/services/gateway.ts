@@ -1,7 +1,9 @@
+import { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { Gateway, GatewayChain, ExternalBlockchain, TatumApiResponse } from '../types.js';
+import { chainProtocolMap, getChainProtocol, getChainApiConfig, ChainApiConfig } from '../utils/chains.js';
 
 // Gateway tool definitions - these belong with the gateway service
-export const GATEWAY_TOOLS = [
+export const GATEWAY_TOOLS: Tool[] = [
   {
     name: 'gateway_get_supported_chains',
     description: "Get a list of all supported blockchain networks available through Tatum's RPC gateways",
@@ -192,6 +194,78 @@ export class GatewayService {
   }
 
   /**
+   * Execute request with intelligent protocol detection based on chain
+   */
+  public async executeChainRequest({
+    chainName,
+    method,
+    params = []
+  }: {
+    chainName: string;
+    method: string;
+    params?: any[];
+  }): Promise<TatumApiResponse> {
+    try {
+      const gatewayUrl = await this.getGatewayUrl(chainName);
+      if (!gatewayUrl) {
+        return {
+          error: `Gateway URL not found for chain: ${chainName}`,
+          status: 404,
+          statusText: 'Not Found'
+        };
+      }
+
+      const protocol = getChainProtocol(chainName);
+      const apiConfig = getChainApiConfig(chainName);
+      
+      if (protocol === 'rest') {
+        // For REST chains, enhance method handling with chain-specific configurations
+        let restMethod = method;
+        
+        // Handle chain-specific method formatting
+        if (!method.includes(' ') && !method.startsWith('GET') && !method.startsWith('POST')) {
+          // Add base path prefix if configured
+          if (apiConfig.basePathPrefix && !method.startsWith(apiConfig.basePathPrefix)) {
+            restMethod = `GET ${apiConfig.basePathPrefix}/${method.replace(/^\//, '')}`;
+          } else {
+            restMethod = `GET /${method.replace(/^\//, '')}`;
+          }
+        }
+        
+        // Special handling for specific chains
+        if (chainName.startsWith('kadena-')) {
+          // Kadena requires specific path structure
+          if (!method.includes('chainweb')) {
+            const network = chainName.includes('testnet') ? 'testnet04' : 'mainnet01';
+            restMethod = `GET /chainweb/0.0/${network}/${method.replace(/^\//, '')}`;
+          }
+        } else if (chainName.startsWith('cardano-')) {
+          // Cardano uses Blockfrost API structure
+          if (!method.includes('api/v0')) {
+            restMethod = `GET /api/v0/${method.replace(/^\//, '')}`;
+          }
+        } else if (chainName.startsWith('flow-')) {
+          // Flow uses specific v1 API structure
+          if (!method.includes('v1')) {
+            restMethod = `GET /v1/${method.replace(/^\//, '')}`;
+          }
+        }
+        
+        return await this.executeRestRequestWithConfig(gatewayUrl, restMethod, params, apiConfig);
+      } else {
+        // For JSON-RPC chains like Ethereum
+        return await this.executeJsonRpcRequest(gatewayUrl, method, params);
+      }
+    } catch (error: any) {
+      return {
+        error: error.message || 'Request failed',
+        status: error.status || 500,
+        statusText: error.statusText || 'Error'
+      };
+    }
+  }
+
+  /**
    * Execute JSON-RPC request
    */
   private async executeJsonRpcRequest(url: string, method: string, params: any[] = []): Promise<TatumApiResponse> {
@@ -218,30 +292,118 @@ export class GatewayService {
   }
 
   /**
-   * Execute REST request
+   * Execute REST request with chain-specific configuration
    */
-  private async executeRestRequest(baseUrl: string, methodPath: string, body?: any): Promise<TatumApiResponse> {
+  private async executeRestRequestWithConfig(
+    baseUrl: string, 
+    methodPath: string, 
+    params?: any, 
+    apiConfig?: any
+  ): Promise<TatumApiResponse> {
     const [httpMethod, restPath] = methodPath.includes(' ') 
       ? methodPath.split(' ') 
-      : ['POST', methodPath];
+      : ['GET', methodPath];
 
-    const url = `${baseUrl}${restPath}`;
+    let url = `${baseUrl}${restPath}`;
     
-    const response = await fetch(url, {
+    // Handle query parameters for GET requests
+    if (httpMethod.toUpperCase() === 'GET' && params && Array.isArray(params) && params.length > 0) {
+      const queryParams = new URLSearchParams();
+      
+      // If params is an array with a single object, use that object's properties as query params
+      if (params.length === 1 && typeof params[0] === 'object' && params[0] !== null) {
+        const paramObj = params[0];
+        Object.entries(paramObj).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, String(value));
+          }
+        });
+      }
+      
+      // If there are query parameters, append them to the URL
+      if (queryParams.toString()) {
+        url += (url.includes('?') ? '&' : '?') + queryParams.toString();
+      }
+    }
+    
+    const requestOptions: RequestInit = {
       method: httpMethod.toUpperCase(),
       headers: {
         'Content-Type': 'application/json',
         'X-API-Key': this.apiKey
-      },
-      body: httpMethod.toUpperCase() === 'POST' ? JSON.stringify(body) : undefined
-    });
-
-    const data = await response.json();
-    return {
-      data,
-      status: response.status,
-      statusText: response.statusText
+      }
     };
+
+    // Add body for POST requests
+    if (httpMethod.toUpperCase() === 'POST' && params) {
+      requestOptions.body = JSON.stringify(params);
+    }
+
+    try {
+      const response = await fetch(url, requestOptions);
+      
+      // Handle different response types
+      let data: any;
+      const contentType = response.headers.get('content-type');
+      
+      try {
+        if (contentType && contentType.includes('application/json')) {
+          // Try to parse as JSON
+          const text = await response.text();
+          if (text.trim()) {
+            data = JSON.parse(text);
+          } else {
+            data = null; // Empty response
+          }
+        } else {
+          // Non-JSON response, return as text
+          data = await response.text();
+        }
+      } catch (parseError) {
+        // If JSON parsing fails, try to get the raw text
+        try {
+          data = await response.text();
+        } catch (textError) {
+          data = { 
+            error: 'Failed to parse response', 
+            originalError: parseError,
+            url: url,
+            method: httpMethod
+          };
+        }
+      }
+      
+      // Enhanced error handling based on chain configuration
+      if (!response.ok) {
+        const errorMessage = data?.message || data?.error || `HTTP ${response.status}: ${response.statusText}`;
+        return {
+          error: errorMessage,
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        };
+      }
+      
+      return {
+        data,
+        status: response.status,
+        statusText: response.statusText
+      };
+    } catch (networkError: any) {
+      return {
+        error: `Network error: ${networkError.message}`,
+        status: 500,
+        statusText: 'Network Error',
+        data: null
+      };
+    }
+  }
+
+  /**
+   * Execute REST request (legacy method for backward compatibility)
+   */
+  private async executeRestRequest(baseUrl: string, methodPath: string, params?: any): Promise<TatumApiResponse> {
+    return this.executeRestRequestWithConfig(baseUrl, methodPath, params);
   }
 
   /**
