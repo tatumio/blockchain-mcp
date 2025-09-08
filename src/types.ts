@@ -106,3 +106,6 @@ export interface ExternalBlockchain {
   type: string;
   website: string;
 }
+
+// Re-export Bitcoin types
+export * from './types/bitcoin.js';

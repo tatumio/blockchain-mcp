@@ -20,7 +20,22 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:bitcoin": "echo 'Bitcoin Service Test Suite - Available commands:' && echo 'test:bitcoin:unit - Run unit tests' && echo 'test:bitcoin:integration - Run integration tests' && echo 'test:bitcoin:performance - Run performance tests' && echo 'test:bitcoin:e2e - Run end-to-end tests' && echo 'test:bitcoin:all - Run all tests' && echo 'test:bitcoin:coverage - Run with coverage'",
+    "test:bitcoin:unit": "jest 'src/services/__tests__/bitcoin.*unit.test.ts' --testTimeout=30000",
+    "test:bitcoin:validation": "jest 'src/services/__tests__/bitcoin.validation.test.ts' --testTimeout=10000",
+    "test:bitcoin:error-handling": "jest 'src/services/__tests__/bitcoin.error-handling.test.ts' --testTimeout=30000",
+    "test:bitcoin:mock-data": "jest 'src/services/__tests__/bitcoin.mock-data.test.ts' --testTimeout=15000",
+    "test:bitcoin:api-errors": "jest 'src/services/__tests__/bitcoin.api-errors.test.ts' --testTimeout=30000",
+    "test:bitcoin:e2e": "jest 'src/services/__tests__/bitcoin.e2e.test.ts' --testTimeout=45000",
+    "test:bitcoin:all": "jest 'src/services/__tests__/bitcoin.*.test.ts' --testTimeout=60000",
+    "test:bitcoin:coverage": "jest 'src/services/__tests__/bitcoin.*.test.ts' --coverage --coverageDirectory=coverage/bitcoin --testTimeout=60000",
+    "test:bitcoin:watch": "jest 'src/services/__tests__/bitcoin.*.test.ts' --watch --testTimeout=60000",
+    "test:bitcoin:integration": "INTEGRATION_TESTS=true jest src/services/__tests__/bitcoin.integration.test.ts --testTimeout=120000",
+    "test:bitcoin:performance": "jest src/services/__tests__/bitcoin.performance.test.ts --testTimeout=60000 --runInBand"
   },
   "keywords": [
     "mcp",
@@ -57,7 +72,10 @@
     "dotenv": "^16.3.0"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^22.10.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
     "ts-node": "^10.9.0",
     "typescript": "^5.0.0"
   },

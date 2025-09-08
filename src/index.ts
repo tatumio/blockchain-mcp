@@ -15,6 +15,7 @@ import { TatumApiClient } from './api-client.js';
 import { ToolExecutionContext } from './types.js';
 import { GatewayService, GATEWAY_TOOLS } from './services/gateway.js';
 import { DataService, DATA_TOOLS } from './services/data.js';
+import { BitcoinService, BITCOIN_TOOLS } from './services/bitcoin.js';
 
 // Inline environment validation functions
 function validateEnvironment(): void {
@@ -38,6 +39,7 @@ class TatumMCPServer {
   private apiClient?: TatumApiClient;
   private gatewayService?: GatewayService;
   private dataService?: DataService;
+  private bitcoinService?: BitcoinService;
 
   constructor() {
     this.server = new Server(
@@ -177,6 +179,106 @@ class TatumMCPServer {
     }
   }
 
+  private async executeBitcoinTool(name: string, args: any): Promise<any> {
+    // Initialize bitcoin service if needed
+    if (!this.bitcoinService) {
+      this.apiClient ??= await this.initializeApiClient();
+      this.bitcoinService = new BitcoinService(this.apiClient);
+    }
+
+    switch (name) {
+      case 'bitcoin_generate_wallet':
+        return await this.bitcoinService.generateWallet();
+      
+      case 'bitcoin_generate_address':
+        if (!args.xpub || args.index === undefined) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: xpub, index');
+        }
+        return await this.bitcoinService.generateAddress(args);
+      
+      case 'bitcoin_generate_private_key':
+        if (!args.mnemonic || args.index === undefined) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: mnemonic, index');
+        }
+        return await this.bitcoinService.generatePrivateKey(args);
+      
+      case 'bitcoin_get_blockchain_info':
+        return await this.bitcoinService.getBlockchainInfo();
+      
+      case 'bitcoin_get_block_hash':
+        if (args.height === undefined) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: height');
+        }
+        return await this.bitcoinService.getBlockHash(args);
+      
+      case 'bitcoin_get_block':
+        if (!args.hash && args.height === undefined) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: hash or height');
+        }
+        return await this.bitcoinService.getBlock(args);
+      
+      case 'bitcoin_get_balance':
+        if (!args.address) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: address');
+        }
+        return await this.bitcoinService.getBalance(args);
+      
+      case 'bitcoin_get_multiple_balances':
+        if (!args.addresses) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: addresses');
+        }
+        return await this.bitcoinService.getMultipleBalances(args);
+      
+      case 'bitcoin_get_transactions':
+        if (!args.address) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: address');
+        }
+        return await this.bitcoinService.getTransactions(args);
+      
+      case 'bitcoin_get_transactions_batch':
+        if (!args.addresses) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: addresses');
+        }
+        return await this.bitcoinService.getTransactionsBatch(args);
+      
+      case 'bitcoin_get_transaction':
+        if (!args.hash) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: hash');
+        }
+        return await this.bitcoinService.getTransaction(args);
+      
+      case 'bitcoin_send_transaction':
+        if (!args.fromAddress || !args.to) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: fromAddress, to');
+        }
+        return await this.bitcoinService.sendTransaction(args);
+      
+      case 'bitcoin_broadcast_transaction':
+        if (!args.txData) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: txData');
+        }
+        return await this.bitcoinService.broadcastTransaction(args);
+      
+      case 'bitcoin_get_utxo':
+        if (!args.hash || args.index === undefined) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: hash, index');
+        }
+        return await this.bitcoinService.getUtxo(args);
+      
+      case 'bitcoin_get_mempool_transactions':
+        return await this.bitcoinService.getMempoolTransactions();
+      
+      case 'bitcoin_connect_rpc_driver':
+        if (!args.nodeUrl) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: nodeUrl');
+        }
+        return await this.bitcoinService.connectRpcDriver(args);
+      
+      default:
+        throw new McpError(ErrorCode.MethodNotFound, `Unknown bitcoin tool: ${name}`);
+    }
+  }
+
 
 
   private formatResponseData(data: any): string | null {
@@ -188,7 +290,7 @@ class TatumMCPServer {
 
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
-      // Combine gateway and data tools
+      // Combine gateway, data, and bitcoin tools
       const allTools = [
         ...GATEWAY_TOOLS.map(tool => ({
           name: tool.name,
@@ -198,6 +300,11 @@ class TatumMCPServer {
         ...DATA_TOOLS.map(tool => ({
           name: tool.name,
           description: `[data] ${tool.description}`,
+          inputSchema: tool.inputSchema
+        })),
+        ...BITCOIN_TOOLS.map(tool => ({
+          name: tool.name,
+          description: `[bitcoin] ${tool.description}`,
           inputSchema: tool.inputSchema
         }))
       ];
@@ -224,6 +331,16 @@ class TatumMCPServer {
         } else if (DATA_TOOLS.some(tool => tool.name === name)) {
           // Handle data tools
           result = await this.executeDataTool(name, args);
+          return this.buildResponse({
+            success: !result.error,
+            data: this.formatResponseData(result.data),
+            error: result.error,
+            status: result.status,
+            endpoint: null
+          });
+        } else if (BITCOIN_TOOLS.some(tool => tool.name === name)) {
+          // Handle bitcoin tools
+          result = await this.executeBitcoinTool(name, args);
           return this.buildResponse({
             success: !result.error,
             data: this.formatResponseData(result.data),
@@ -273,8 +390,8 @@ class TatumMCPServer {
     
     const transport = new StdioServerTransport();
     
-    const totalToolCount = GATEWAY_TOOLS.length + DATA_TOOLS.length;
-    console.error(`Loaded ${totalToolCount} tools (0 regular + ${GATEWAY_TOOLS.length} gateway + ${DATA_TOOLS.length} data)`);
+    const totalToolCount = GATEWAY_TOOLS.length + DATA_TOOLS.length + BITCOIN_TOOLS.length;
+    console.error(`Loaded ${totalToolCount} tools (0 regular + ${GATEWAY_TOOLS.length} gateway + ${DATA_TOOLS.length} data + ${BITCOIN_TOOLS.length} bitcoin)`);
     
     await this.server.connect(transport);
     console.error('Tatum MCP Server ready');
