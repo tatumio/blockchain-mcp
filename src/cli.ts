@@ -5,10 +5,10 @@
  * Command-line interface for running the Tatum MCP Server
  */
 
-import { fileURLToPath } from 'url';
-import path from 'path';
-import fs from 'fs';
 import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -124,6 +124,7 @@ function main() {
     });
     
     child.on('exit', (code) => {
+        console.error(`Tatum MCP Server exited with code ${code} Unexpectedly.`);
         process.exit(code ?? 0);
     });
     
