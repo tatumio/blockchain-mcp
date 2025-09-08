@@ -1,34 +1,54 @@
 #!/usr/bin/env node
 
+import * as dotenv from 'dotenv';
+import path from 'path';
+import { pathToFileURL } from 'url';
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
+  StdioServerTransport,
+} from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   CallToolRequestSchema,
   ErrorCode,
   ListToolsRequestSchema,
   McpError,
 } from '@modelcontextprotocol/sdk/types.js';
-import * as dotenv from 'dotenv';
-
 
 import { TatumApiClient } from './api-client.js';
+import {
+  DATA_TOOLS,
+  DataService,
+} from './services/data.js';
+import {
+  GATEWAY_TOOLS,
+  GatewayService,
+} from './services/gateway.js';
 import { ToolExecutionContext } from './types.js';
-import { GatewayService, GATEWAY_TOOLS } from './services/gateway.js';
-import { DataService, DATA_TOOLS } from './services/data.js';
+
+// Entrypoint detector (to avaoid silent shutdown)
+function isMain(importMeta: ImportMeta): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;                           // e.g., node -e
+  const entryHref = pathToFileURL(path.resolve(entry)).href;
+  return importMeta.url === entryHref;
+}
 
 // Inline environment validation functions
 function validateEnvironment(): void {
-  const missing = ['TATUM_API_KEY'].filter(env => !process.env[env]);
-  
+  const missing = ["TATUM_API_KEY"].filter((env) => !process.env[env]);
+
   if (missing.length > 0) {
-    console.error([
-      'Missing required environment variables:',
-      ...missing.map(env => `   - ${env}`),
-      '',
-      'Get your API key at: https://dashboard.tatum.io',
-      'Set it using: export TATUM_API_KEY="your-api-key"',
-      'Or use CLI: npx @tatumio/blockchain-mcp --api-key your-api-key'
-    ].join('\n'));
+    console.error(
+      [
+        "Missing required environment variables:",
+        ...missing.map((env) => `   - ${env}`),
+        "",
+        "Get your API key at: https://dashboard.tatum.io",
+        'Set it using: export TATUM_API_KEY="your-api-key"',
+        "Or use CLI: npx @tatumio/blockchain-mcp --api-key your-api-key",
+      ].join("\n")
+    );
     process.exit(1);
   }
 }
@@ -42,8 +62,8 @@ class TatumMCPServer {
   constructor() {
     this.server = new Server(
       {
-        name: '@tatumio/blockchain-mcp',
-        version: '1.0.0',
+        name: "@tatumio/blockchain-mcp",
+        version: "1.0.0",
       },
       {
         capabilities: {
@@ -59,10 +79,10 @@ class TatumMCPServer {
     return {
       content: [
         {
-          type: 'text',
-          text: JSON.stringify(responseObj, null, 2)
-        }
-      ]
+          type: "text",
+          text: JSON.stringify(responseObj, null, 2),
+        },
+      ],
     };
   }
 
@@ -75,32 +95,46 @@ class TatumMCPServer {
     }
 
     switch (name) {
-      case 'gateway_get_supported_chains':
+      case "gateway_get_supported_chains":
         return await this.gatewayService.getSupportedChains();
-      
-      case 'gateway_get_supported_methods':
+
+      case "gateway_get_supported_methods":
         if (!args.chain) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: chain');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameter: chain"
+          );
         }
-        const methodsGatewayUrl = await this.gatewayService.getGatewayUrl(args.chain);
+        const methodsGatewayUrl = await this.gatewayService.getGatewayUrl(
+          args.chain
+        );
         if (!methodsGatewayUrl) {
-          throw new McpError(ErrorCode.InvalidParams, `Gateway URL not found for chain: ${args.chain}`);
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            `Gateway URL not found for chain: ${args.chain}`
+          );
         }
         return await this.gatewayService.getAvailableMethods(methodsGatewayUrl);
-      
-      case 'gateway_execute_rpc':
+
+      case "gateway_execute_rpc":
         if (!args.chain || !args.method) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, method');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, method"
+          );
         }
         // Use the new intelligent chain request method
         return await this.gatewayService.executeChainRequest({
           chainName: args.chain,
           method: args.method,
-          params: args.params || []
+          params: args.params || [],
         });
-      
+
       default:
-        throw new McpError(ErrorCode.MethodNotFound, `Unknown gateway tool: ${name}`);
+        throw new McpError(
+          ErrorCode.MethodNotFound,
+          `Unknown gateway tool: ${name}`
+        );
     }
   }
 
@@ -112,96 +146,127 @@ class TatumMCPServer {
     }
 
     switch (name) {
-      case 'get_metadata':
+      case "get_metadata":
         if (!args.chain || !args.tokenAddress || !args.tokenIds) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, tokenAddress, tokenIds');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, tokenAddress, tokenIds"
+          );
         }
         return await this.dataService.getMetadata(args);
-      
-      case 'get_wallet_balance_by_time':
+
+      case "get_wallet_balance_by_time":
         if (!args.chain || !args.addresses) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, addresses');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, addresses"
+          );
         }
         return await this.dataService.getWalletBalanceByTime(args);
-      
-      case 'get_wallet_portfolio':
+
+      case "get_wallet_portfolio":
         if (!args.chain || !args.addresses || !args.tokenTypes) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, addresses, tokenTypes');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, addresses, tokenTypes"
+          );
         }
         return await this.dataService.getWalletPortfolio(args);
-      
-      case 'get_owners':
+
+      case "get_owners":
         if (!args.chain || !args.tokenAddress) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, tokenAddress');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, tokenAddress"
+          );
         }
         return await this.dataService.getOwners(args);
-      
-      case 'check_owner':
+
+      case "check_owner":
         if (!args.chain || !args.address || !args.tokenAddress) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, address, tokenAddress');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, address, tokenAddress"
+          );
         }
         return await this.dataService.checkOwner(args);
-      
-      case 'get_transaction_history':
+
+      case "get_transaction_history":
         if (!args.chain) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: chain');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameter: chain"
+          );
         }
         return await this.dataService.getTransactionHistory(args);
-      
-      case 'get_block_by_time':
+
+      case "get_block_by_time":
         if (!args.chain) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: chain');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameter: chain"
+          );
         }
         return await this.dataService.getBlockByTime(args);
-      
-      case 'get_tokens':
+
+      case "get_tokens":
         if (!args.chain || !args.tokenAddress) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, tokenAddress');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: chain, tokenAddress"
+          );
         }
         return await this.dataService.getTokens(args);
-      
-      case 'check_malicious_address':
+
+      case "check_malicious_address":
         if (!args.address) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: address');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameter: address"
+          );
         }
         return await this.dataService.checkMaliciousAddress(args);
-      
-      case 'get_exchange_rate':
+
+      case "get_exchange_rate":
         if (!args.symbol || !args.basePair) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: symbol, basePair');
+          throw new McpError(
+            ErrorCode.InvalidParams,
+            "Missing required parameters: symbol, basePair"
+          );
         }
         return await this.dataService.getExchangeRate(args);
-      
+
       default:
-        throw new McpError(ErrorCode.MethodNotFound, `Unknown data tool: ${name}`);
+        throw new McpError(
+          ErrorCode.MethodNotFound,
+          `Unknown data tool: ${name}`
+        );
     }
   }
-
-
 
   private formatResponseData(data: any): string | null {
     if (!data) {
       return null;
     }
-    return typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    return typeof data === "string" ? data : JSON.stringify(data, null, 2);
   }
 
   private setupHandlers(): void {
     this.server.setRequestHandler(ListToolsRequestSchema, async () => {
       // Combine gateway and data tools
       const allTools = [
-        ...GATEWAY_TOOLS.map(tool => ({
+        ...GATEWAY_TOOLS.map((tool) => ({
           name: tool.name,
           description: `[gateway] ${tool.description}`,
-          inputSchema: tool.inputSchema
+          inputSchema: tool.inputSchema,
         })),
-        ...DATA_TOOLS.map(tool => ({
+        ...DATA_TOOLS.map((tool) => ({
           name: tool.name,
           description: `[data] ${tool.description}`,
-          inputSchema: tool.inputSchema
-        }))
+          inputSchema: tool.inputSchema,
+        })),
       ];
-      
+
       return { tools: allTools };
     });
 
@@ -210,8 +275,8 @@ class TatumMCPServer {
 
       try {
         let result;
-        
-        if (name.startsWith('gateway_')) {
+
+        if (name.startsWith("gateway_")) {
           // Handle gateway tools
           result = await this.executeGatewayTool(name, args);
           return this.buildResponse({
@@ -219,9 +284,9 @@ class TatumMCPServer {
             data: this.formatResponseData(result),
             error: null,
             status: 200,
-            endpoint: null
+            endpoint: null,
           });
-        } else if (DATA_TOOLS.some(tool => tool.name === name)) {
+        } else if (DATA_TOOLS.some((tool) => tool.name === name)) {
           // Handle data tools
           result = await this.executeDataTool(name, args);
           return this.buildResponse({
@@ -229,7 +294,7 @@ class TatumMCPServer {
             data: this.formatResponseData(result.data),
             error: result.error,
             status: result.status,
-            endpoint: null
+            endpoint: null,
           });
         } else {
           // Unknown tool
@@ -239,8 +304,8 @@ class TatumMCPServer {
         return this.buildResponse({
           success: false,
           data: null,
-          error: error instanceof Error ? error.message : 'Unknown error',
-          status: 500
+          error: error instanceof Error ? error.message : "Unknown error",
+          status: 500,
         });
       }
     });
@@ -248,68 +313,82 @@ class TatumMCPServer {
 
   private async initializeApiClient(): Promise<TatumApiClient> {
     const apiKey = process.env.TATUM_API_KEY;
-    
+
     if (!apiKey) {
       throw new McpError(
         ErrorCode.InvalidRequest,
-        'TATUM_API_KEY environment variable is required'
+        "TATUM_API_KEY environment variable is required"
       );
     }
 
     const context: ToolExecutionContext = {
       apiKey,
-      baseUrl: 'https://api.tatum.io',
+      baseUrl: "https://api.tatum.io",
       timeout: 30000,
-      retryAttempts: 3
+      retryAttempts: 3,
     };
 
     const client = new TatumApiClient(context);
-    
+
     return client;
   }
 
   public async start(): Promise<void> {
-    console.error('Starting Tatum MCP Server...');
-    
+    console.error("Starting Tatum MCP Server...");
+
     const transport = new StdioServerTransport();
-    
+
     const totalToolCount = GATEWAY_TOOLS.length + DATA_TOOLS.length;
-    console.error(`Loaded ${totalToolCount} tools (0 regular + ${GATEWAY_TOOLS.length} gateway + ${DATA_TOOLS.length} data)`);
-    
+    console.error(
+      `Loaded ${totalToolCount} tools (0 regular + ${GATEWAY_TOOLS.length} gateway + ${DATA_TOOLS.length} data)`
+    );
+
     await this.server.connect(transport);
-    console.error('Tatum MCP Server ready');
+    console.error("Tatum MCP Server ready");
   }
 }
 
 async function main(): Promise<void> {
   // Load environment variables first
   dotenv.config();
-  
+
   // Validate environment before starting server
   validateEnvironment();
-  
+
   try {
     const server = new TatumMCPServer();
     await server.start();
   } catch (error) {
-    console.error('Failed to start server:', error);
+    console.error("Failed to start server:", error);
     process.exit(1);
   }
 }
 
-process.on('SIGINT', () => {
-  console.error('Received SIGINT, shutting down gracefully...');
+process.on("SIGINT", () => {
+  console.error("Received SIGINT, shutting down gracefully...");
   process.exit(0);
 });
 
-process.on('SIGTERM', () => {
-  console.error('Received SIGTERM, shutting down gracefully...');
+process.on("SIGTERM", () => {
+  console.error("Received SIGTERM, shutting down gracefully...");
   process.exit(0);
 });
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+//Causing silent exits
+
+// if (import.meta.url === `file://${process.argv[1]}`) {
+//   main().catch((error) => {
+//     console.error("Unhandled error:", error);
+//     process.exit(1);
+//   });
+// }
+
+// Use the isMain function to check if this is the entry point
+
+if (isMain(import.meta)) {
   main().catch((error) => {
-    console.error('Unhandled error:', error);
+    console.error("Unhandled error:", error);
     process.exit(1);
   });
 }
+
