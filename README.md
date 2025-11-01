@@ -9,6 +9,10 @@ A Model Context Protocol (MCP) server that provides access to the Tatum Blockcha
 
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=tatumio&config=eyJjb21tYW5kIjoibnB4IEB0YXR1bWlvL2Jsb2NrY2hhaW4tbWNwIiwiZW52Ijp7IlRBVFVNX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D)
 
+<a href="https://glama.ai/mcp/servers/@tatumio/tatum-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@tatumio/tatum-mcp/badge" alt="Tatum Server MCP server" />
+</a>
+
 ## 🚀 Features
 
 - **130+ Blockchain Networks**: Bitcoin, Ethereum, Solana, Polygon, Arbitrum, Base, Avalanche, and many more.
