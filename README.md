@@ -112,3 +112,8 @@ Tatum is a blockchain development platform that provides APIs, SDKs, and tools f
 ---
 
 **Made with ❤️ by the Tatum team**
+
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/tatumio-blockchain-mcp).
+
