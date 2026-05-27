@@ -1,7 +1,7 @@
 {
   "name": "@tatumio/blockchain-mcp",
-  "version": "1.0.4",
-  "description": "Model Context Protocol server providing access to Tatum's comprehensive blockchain API across 130+ networks with 13 tools",
+  "version": "1.1.0",
+  "description": "Model Context Protocol server for Tatum — gateway RPC, data API, and dynamic OpenAPI discovery across 130+ networks",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
@@ -10,7 +10,8 @@
   },
   "files": [
     "dist/**/*",
-    "features/**/*",
+    "config/**/*",
+    "generated/**/*",
     "README.md",
     "LICENSE"
   ],
@@ -20,7 +21,8 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "watch": "tsc --watch",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "generate:openapi-index": "node scripts/generate-openapi-index.mjs"
   },
   "keywords": [
     "mcp",
@@ -52,9 +54,10 @@
     "url": "https://github.com/tatumio/blockchain-mcp/issues"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "axios": "^1.6.0",
-    "dotenv": "^16.3.0"
+    "dotenv": "^16.3.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

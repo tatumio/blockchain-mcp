@@ -1,0 +1,53 @@
+{
+  "version": "1.2",
+  "openapiBaseUrl": "https://docs.tatum.io/openapi/",
+  "tiers": {
+    "core": {
+      "description": "Tatum product REST APIs on api.tatum.io — always loaded",
+      "files": [
+        "blockchain-data-1.json",
+        "blockchain-1.json",
+        "gateway-management-service.json",
+        "utils-1.json"
+      ]
+    },
+    "platform": {
+      "description": "Optional platform APIs — enable with TATUM_MCP_PLATFORM_PACKS",
+      "files": [
+        "smart-contracts-1.json",
+        "virtual-accounts-1.json",
+        "notifications-1.json",
+        "security-1.json",
+        "storage-1.json"
+      ],
+      "defaultEnabled": []
+    },
+    "chainGatewayRest": {
+      "description": "Per-chain REST gateway docs — enable with gateway_enable_chain_api tool",
+      "chainToSpec": {
+        "tron-mainnet": "tron-http-api-1.json",
+        "tron-testnet": "tron-http-api-1.json",
+        "ethereum-mainnet": "eth-beacon-node-api-1.json",
+        "ethereum-sepolia": "eth-beacon-node-api-1.json",
+        "ethereum-holesky": "eth-beacon-node-api-1.json",
+        "stellar-mainnet": "horizon-2.json",
+        "stellar-testnet": "horizon-2.json",
+        "ton-mainnet": "ton-api-3.json",
+        "ton-testnet": "ton-api-3.json",
+        "cardano-mainnet": "cardano-rosetta-2.json",
+        "cardano-testnet": "cardano-rosetta-2.json",
+        "kadena-mainnet": "kadena-chainweb-node-api-4.json",
+        "kadena-testnet": "kadena-chainweb-node-api-4.json"
+      }
+    }
+  },
+  "excludePatterns": [
+    "eth_*-*.json",
+    "sui_*-*.json",
+    "*-solana.json",
+    "*-near.json",
+    "debug_*",
+    "trace_*",
+    "kaia_*-*.json"
+  ]
+}

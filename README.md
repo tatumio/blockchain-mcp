@@ -55,6 +55,29 @@ Add this server to your MCP client configuration:
 }
 ```
 
+## Dynamic tool discovery (v1.1+)
+
+The server loads a searchable **OpenAPI operation index** (~488 core REST operations) plus the original 13 tools. Use meta-tools to discover and call any indexed endpoint:
+
+| Tool | Purpose |
+|------|---------|
+| `tatum_list_api_catalog` | See loaded spec files and operation counts |
+| `tatum_search_operations` | Find operations by keyword (e.g. `subscription`, `portfolio`) |
+| `tatum_invoke_operation` | Call an operation by `operationId` from search results |
+| `gateway_enable_chain_api` | Load Tron/Stellar/TON REST packs for a chain (sends `list_changed`) |
+
+**Optional platform APIs** (notifications, NFT mint, virtual accounts, KMS, storage):
+
+```bash
+export TATUM_MCP_PLATFORM_PACKS=notifications-1.json,smart-contracts-1.json
+```
+
+See [docs/PHASES.md](docs/PHASES.md) for phase-by-phase behavior and before/after examples.
+
+Regenerate the bundled index: `npm run generate:openapi-index`
+
+---
+
 ## 🛠️ Available Tools
 
 ### Blockchain Data (10 tools)
