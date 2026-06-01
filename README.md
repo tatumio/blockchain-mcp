@@ -11,9 +11,9 @@ A [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server that ex
 
 ## Features
 
-- **130+ networks** — Bitcoin, Ethereum, Solana, Polygon, Arbitrum, Base, Avalanche, and more (via gateway).
-- **Blockchain Data API** — Balances, portfolios, transactions, NFT metadata, exchange rates, security checks.
-- **RPC Gateway** — JSON-RPC and REST calls on supported chains.
+- **130+ Blockchain Networks**: [Bitcoin](https://tatum.io/chain/bitcoin), [Ethereum](https://tatum.io/chain/ethereum), [Solana](https://tatum.io/chain/solana), [Polygon](https://tatum.io/chain/polygon), [Arbitrum](https://tatum.io/chain/arbitrum), [Base](https://tatum.io/chain/base), [Avalanche](https://tatum.io/chain/avalanche), and many more.
+- 🔗 **[Blockchain Data API](https://tatum.io/blockchain-api)**: Blocks, transactions, balances, network info, and more. 
+- 🌐 **[RPC Gateway](https://tatum.io/nodes)**: Direct access to blockchain RPC endpoints. 
 
 Requires Node.js **18+** and a `TATUM_API_KEY`.
 
