@@ -5,48 +5,39 @@
 [![NPM Version](https://img.shields.io/npm/v/%40tatumio%2Fblockchain-mcp)](https://www.npmjs.com/package/@tatumio/blockchain-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A Model Context Protocol (MCP) server that provides access to the Tatum Blockchain Data API and RPC Gateway, enabling any LLM to read and write blockchain data across **130+ networks**. Visit [official MCP webpage](https://tatum.io/mcp) for more details and to get your Tatum API key. 
+A Model Context Protocol (MCP) server that provides access to the Tatum REST APIs and RPC Gateway, enabling any LLM to read and write blockchain data across **130+ networks**. Visit [official MCP webpage](https://tatum.io/mcp) for more details and to get your Tatum API key.
 
 [![Install MCP Server](https://cursor.com/deeplink/mcp-install-dark.svg)](https://cursor.com/en/install-mcp?name=tatumio&config=eyJjb21tYW5kIjoibnB4IEB0YXR1bWlvL2Jsb2NrY2hhaW4tbWNwIiwiZW52Ijp7IlRBVFVNX0FQSV9LRVkiOiJZT1VSX0FQSV9LRVkifX0%3D)
 
-## 🚀 Features
+## Features
 
 - **130+ Blockchain Networks**: Bitcoin, Ethereum, Solana, Polygon, Arbitrum, Base, Avalanche, and many more.
-- 🔗 **Blockchain Data API**: Blocks, transactions, balances, network info, and more. 
-- 🌐 **RPC Gateway**: Direct access to blockchain RPC endpoints. 
+- **OpenAPI discovery**: Search and invoke **697+** REST operations (data, notifications, NFT, virtual accounts, KMS, storage, gateway management).
+- **RPC Gateway**: Direct JSON-RPC and REST access via `gateway_discover` and `gateway_execute_rpc`.
+- **Offline-friendly**: Bundled OpenAPI index; background refresh when online.
 
-## 📦 Installation
-
-### Global Installation (Recommended)
+## Installation
 
 ```bash
 npm install -g @tatumio/blockchain-mcp
 ```
 
-### Local Installation
+## Getting started
 
-```bash
-npm install @tatumio/blockchain-mcp
-```
-
-## 🔑 Getting Started
-
-### 1. Get Your API Key
+### 1. Get your API key
 
 Get your free API key from [Tatum Dashboard](https://dashboard.tatum.io).
 
-### 2. MCP Client Integration
+### 2. MCP client configuration
 
-Add this server to your MCP client configuration:
+Only `TATUM_API_KEY` is required — no platform pack env vars:
 
 ```json
 {
   "mcpServers": {
     "tatumio": {
       "command": "npx",
-      "args": [
-        "@tatumio/blockchain-mcp"
-      ],
+      "args": ["@tatumio/blockchain-mcp"],
       "env": {
         "TATUM_API_KEY": "YOUR_API_KEY"
       }
@@ -55,83 +46,50 @@ Add this server to your MCP client configuration:
 }
 ```
 
-## Dynamic tool discovery (v1.1+)
-
-The server loads a searchable **OpenAPI operation index** (~488 core REST operations) plus the original 13 tools. Use meta-tools to discover and call any indexed endpoint:
+## MCP tools (v1.2)
 
 | Tool | Purpose |
 |------|---------|
-| `tatum_list_api_catalog` | See loaded spec files and operation counts |
-| `tatum_search_operations` | Find operations by keyword (e.g. `subscription`, `portfolio`) |
-| `tatum_invoke_operation` | Call an operation by `operationId` from search results |
-| `gateway_enable_chain_api` | Load Tron/Stellar/TON REST packs for a chain (sends `list_changed`) |
+| `tatum_search_operations` | Find REST APIs by keyword (auto-loads notifications, NFT, portfolio, Tron, etc.) |
+| `tatum_invoke_operation` | Execute an operation by `operationId` from search |
+| `tatum_openapi_status` | Index mode (live/cached), bundle age, loaded specs |
+| `tatum_refresh_openapi_cache` | Refresh OpenAPI from docs.tatum.io (background by default) |
+| `gateway_discover` | List all chains, or methods for one chain |
+| `gateway_execute_rpc` | Run JSON-RPC or REST on a gateway |
 
-**Optional platform APIs** (notifications, NFT mint, virtual accounts, KMS, storage):
+### Example: notification subscription
 
-```bash
-export TATUM_MCP_PLATFORM_PACKS=notifications-1.json,smart-contracts-1.json
-```
+1. `tatum_search_operations({ query: "subscription incoming transaction" })`
+2. `tatum_invoke_operation({ operationId: "...", body: { ... } })`
 
-See [docs/PHASES.md](docs/PHASES.md) for phase-by-phase behavior and before/after examples.
+### Example: ETH balance via RPC
 
-Regenerate the bundled index: `npm run generate:openapi-index`
+1. `gateway_discover({ chain: "ethereum-mainnet" })`
+2. `gateway_execute_rpc({ chain: "ethereum-mainnet", method: "eth_getBalance", params: ["0x...", "latest"] })`
 
----
+## OpenAPI index
 
-## 🛠️ Available Tools
+- **Bundled offline index:** `generated/openapi-operations.json` (core + platform specs).
+- **Regenerate:** `npm run generate:openapi-index`
+- **Background refresh:** runs automatically after server start when network is available.
 
-### Blockchain Data (10 tools)
+Optional: `TATUM_MCP_PLATFORM_PACKS=extra-spec.json` to add more specs at refresh time.
 
-- **get_metadata** - Fetch NFT/multitoken metadata by address and IDs
-- **get_wallet_balance_by_time** - Get wallet balance at specific time
-- **get_wallet_portfolio** - Get comprehensive wallet portfolio
-- **get_owners** - Get owners of NFT/token
-- **check_owner** - Check if address owns specific token
-- **get_transaction_history** - Get transaction history for address
-- **get_block_by_time** - Get block information by timestamp
-- **get_tokens** - Get tokens for specific wallet
-- **check_malicous_address** - Check if address is malicious
-- **get_exchange_rate** - Get real-time exchange rates
+See [docs/PHASES.md](docs/PHASES.md) for architecture details.
 
-### RPC Gateways (4 tools)
+## Supported networks
 
-- **gateway_get_supported_chains** - Get all supported blockchain networks
-- **gateway_get_supported_methods** - Get supported RPC methods for chain
-- **gateway_execute_rpc** - Execute RPC calls on any supported chain
+EVM, Bitcoin, Solana, Tron, Stellar, TON, Cardano, Kadena, and 120+ more via the RPC gateway. See [Tatum docs](https://docs.tatum.io/docs/supported-blockchains).
 
-## 🌐 Supported Networks
-
-### EVM-Compatible (69 networks)
-
-- **Ethereum**: Mainnet, Sepolia, Holesky
-- **Layer 2**: Polygon, Arbitrum, Optimism, Base
-- **Sidechains**: BSC, Avalanche, Fantom
-- **Enterprise**: Celo, Palm, Gnosis
-- **Gaming**: Ronin, Chiliz
-
-### Non-EVM (61 networks)
-
-- **Bitcoin**: Mainnet, Testnet, Signet
-- **Alternative Coins**: Litecoin, Dogecoin, Bitcoin Cash
-- **Smart Contract Platforms**: Solana, Cardano, Tezos
-- **Enterprise**: Stellar, Ripple, EOS
-
-## 📖 Documentation
+## Documentation
 
 - [Tatum API Documentation](https://docs.tatum.io)
 - [Model Context Protocol](https://modelcontextprotocol.io)
-- [Blockchain Networks](https://docs.tatum.io/docs/supported-blockchains)
-- [API Reference](https://docs.tatum.io/reference)
 
+## License
 
+MIT — see [LICENSE](LICENSE).
 
-## 📄 License
+## About Tatum
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-## 🏢 About Tatum
-
-Tatum is a blockchain development platform that provides APIs, SDKs, and tools for building blockchain applications. Learn more at [tatum.io](https://tatum.io).
-
----
-
-**Made with ❤️ by the Tatum team**
+[Tatum](https://tatum.io) — blockchain APIs, SDKs, and tools for building on-chain applications.

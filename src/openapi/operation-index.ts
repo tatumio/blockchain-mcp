@@ -13,6 +13,20 @@ export class OperationIndex {
     }
   }
 
+  /** Replace all operations for a spec (used when refreshing from network). */
+  replaceOperationsForSpec(operations: OpenApiOperation[], specFile: string): void {
+    const filtered = this.all.filter((op) => op.specFile !== specFile);
+    for (const id of [...this.byId.keys()]) {
+      if (this.byId.get(id)?.specFile === specFile) {
+        this.byId.delete(id);
+      }
+    }
+    this.all.length = 0;
+    this.all.push(...filtered);
+    this.loadedSpecs.delete(specFile);
+    this.addOperations(operations, specFile);
+  }
+
   hasSpec(specFile: string): boolean {
     return this.loadedSpecs.has(specFile);
   }
@@ -29,6 +43,7 @@ export class OperationIndex {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
+    const tokens = q.split(/\s+/).filter(Boolean);
     const specSet = specFiles?.length ? new Set(specFiles) : undefined;
     const scored: Array<{ op: OpenApiOperation; score: number }> = [];
 
@@ -48,7 +63,11 @@ export class OperationIndex {
         .join(' ')
         .toLowerCase();
 
-      if (!haystack.includes(q)) continue;
+      const matches =
+        tokens.length <= 1
+          ? haystack.includes(q)
+          : tokens.every((token) => haystack.includes(token));
+      if (!matches) continue;
 
       let score = 0;
       if (op.operationId.toLowerCase().includes(q)) score += 10;
@@ -63,6 +82,10 @@ export class OperationIndex {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map((s) => s.op);
+  }
+
+  getAllOperations(): readonly OpenApiOperation[] {
+    return this.all;
   }
 
   getStats(): OperationIndexStats {

@@ -11,7 +11,7 @@ export interface ToolDefinition {
   inputSchema: Record<string, unknown>;
   handler: ToolHandler;
   /** MCP tool group for logging */
-  group?: 'gateway' | 'data' | 'openapi' | 'legacy';
+  group?: 'gateway' | 'openapi';
 }
 
 export class ToolRegistry {

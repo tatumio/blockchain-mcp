@@ -17,3 +17,15 @@ export interface OperationIndexStats {
   totalOperations: number;
   bySpec: Record<string, number>;
 }
+
+export type OpenApiDataMode = 'live' | 'cached';
+
+export interface OpenApiStatus {
+  mode: OpenApiDataMode;
+  bundleGeneratedAt: string | null;
+  totalOperations: number;
+  specFiles: string[];
+  bySpec: Record<string, number>;
+  specCache: Array<{ specFile: string; fetchedAt: string; source: 'bundle' | 'network' }>;
+  backgroundRefreshInProgress: boolean;
+}

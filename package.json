@@ -1,7 +1,7 @@
 {
   "name": "@tatumio/blockchain-mcp",
-  "version": "1.1.0",
-  "description": "Model Context Protocol server for Tatum — gateway RPC, data API, and dynamic OpenAPI discovery across 130+ networks",
+  "version": "1.2.0",
+  "description": "Model Context Protocol server for Tatum — RPC gateway and OpenAPI-driven REST discovery across 130+ networks",
   "type": "module",
   "main": "dist/index.js",
   "bin": {

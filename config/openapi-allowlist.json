@@ -1,9 +1,10 @@
 {
-  "version": "1.2",
+  "version": "1.3",
   "openapiBaseUrl": "https://docs.tatum.io/openapi/",
+  "specCacheTtlMs": 86400000,
   "tiers": {
     "core": {
-      "description": "Tatum product REST APIs on api.tatum.io — always loaded",
+      "description": "Tatum product REST APIs on api.tatum.io",
       "files": [
         "blockchain-data-1.json",
         "blockchain-1.json",
@@ -12,7 +13,7 @@
       ]
     },
     "platform": {
-      "description": "Optional platform APIs — enable with TATUM_MCP_PLATFORM_PACKS",
+      "description": "Platform APIs — loaded by default (no MCP env config required)",
       "files": [
         "smart-contracts-1.json",
         "virtual-accounts-1.json",
@@ -20,10 +21,16 @@
         "security-1.json",
         "storage-1.json"
       ],
-      "defaultEnabled": []
+      "defaultEnabled": [
+        "smart-contracts-1.json",
+        "virtual-accounts-1.json",
+        "notifications-1.json",
+        "security-1.json",
+        "storage-1.json"
+      ]
     },
     "chainGatewayRest": {
-      "description": "Per-chain REST gateway docs — enable with gateway_enable_chain_api tool",
+      "description": "Per-chain REST gateway docs — loaded via query router",
       "chainToSpec": {
         "tron-mainnet": "tron-http-api-1.json",
         "tron-testnet": "tron-http-api-1.json",
@@ -40,6 +47,64 @@
         "kadena-testnet": "kadena-chainweb-node-api-4.json"
       }
     }
+  },
+  "specRouter": {
+    "maxSpecsPerQuery": 2,
+    "routes": [
+      {
+        "keywords": ["subscription", "webhook", "notification", "notify"],
+        "specs": ["notifications-1.json"]
+      },
+      {
+        "keywords": ["nft", "mint", "deploy", "multitoken", "erc721", "erc1155"],
+        "specs": ["smart-contracts-1.json"]
+      },
+      {
+        "keywords": ["virtual account", "virtualaccount", "ledger", "deposit", "withdraw", "offchain"],
+        "specs": ["virtual-accounts-1.json"]
+      },
+      {
+        "keywords": ["kms", "key management", "signature id", "private key"],
+        "specs": ["security-1.json"]
+      },
+      {
+        "keywords": ["ipfs", "storage", "upload file", "pin"],
+        "specs": ["storage-1.json"]
+      },
+      {
+        "keywords": ["portfolio", "balance", "wallet", "transaction history", "metadata", "malicious", "exchange rate", "rate", "block", "owner", "token", "defi", "staking"],
+        "specs": ["blockchain-data-1.json", "utils-1.json"]
+      },
+      {
+        "keywords": ["gateway endpoint", "gateway url", "manage gateway"],
+        "specs": ["gateway-management-service.json"]
+      },
+      {
+        "keywords": ["tron", "trc20", "trc10"],
+        "specs": ["tron-http-api-1.json"]
+      },
+      {
+        "keywords": ["stellar", "horizon", "lumens", "xlm"],
+        "specs": ["horizon-2.json"]
+      },
+      {
+        "keywords": ["ton ", " ton", "toncoin"],
+        "specs": ["ton-api-3.json"]
+      },
+      {
+        "keywords": ["cardano", "rosetta", "ada "],
+        "specs": ["cardano-rosetta-2.json"]
+      },
+      {
+        "keywords": ["kadena", "chainweb"],
+        "specs": ["kadena-chainweb-node-api-4.json"]
+      },
+      {
+        "keywords": ["beacon", "validator", "consensus"],
+        "specs": ["eth-beacon-node-api-1.json"]
+      }
+    ],
+    "defaultSpecs": ["blockchain-data-1.json", "blockchain-1.json"]
   },
   "excludePatterns": [
     "eth_*-*.json",

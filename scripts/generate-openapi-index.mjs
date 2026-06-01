@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Downloads allowlisted OpenAPI specs and writes generated/openapi-operations.json
- * Run: node scripts/generate-openapi-index.mjs
+ * Downloads allowlisted OpenAPI specs (core + platform) and writes generated/openapi-operations.json
+ * Run: npm run generate:openapi-index
  */
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
@@ -63,7 +63,9 @@ async function main() {
   const allowlist = JSON.parse(
     await readFile(join(root, 'config/openapi-allowlist.json'), 'utf-8')
   );
-  const files = allowlist.tiers.core.files;
+  const core = allowlist.tiers.core.files;
+  const platform = allowlist.tiers.platform.defaultEnabled ?? allowlist.tiers.platform.files;
+  const files = [...new Set([...core, ...platform])];
   const base = allowlist.openapiBaseUrl;
   const all = [];
 
@@ -81,8 +83,12 @@ async function main() {
   const outDir = join(root, 'generated');
   await mkdir(outDir, { recursive: true });
   const outPath = join(outDir, 'openapi-operations.json');
-  await writeFile(outPath, JSON.stringify({ generatedAt: new Date().toISOString(), operations: all }, null, 2));
-  console.log(`Wrote ${all.length} operations to ${outPath}`);
+  const generatedAt = new Date().toISOString();
+  await writeFile(
+    outPath,
+    JSON.stringify({ generatedAt, operations: all, specFiles: files }, null, 2)
+  );
+  console.log(`Wrote ${all.length} operations from ${files.length} specs to ${outPath}`);
 }
 
 main().catch((e) => {

@@ -32,9 +32,9 @@ Examples:
   tatum-mcp --api-key your-api-key
   TATUM_API_KEY=your-key tatum-mcp
 
-This MCP server provides 14 tools for blockchain operations:
-  • 10 Blockchain Data tools (balances, transactions, NFTs, etc.)
-  • 4 RPC Gateway tools (direct blockchain access)
+This MCP server provides 6 tools for blockchain operations:
+  • 4 OpenAPI tools (search, invoke, status, refresh)
+  • 2 RPC Gateway tools (discover, execute)
 
 For more information, visit: https://docs.tatum.io
 `);
