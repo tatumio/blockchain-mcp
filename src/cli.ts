@@ -15,10 +15,10 @@ const __dirname = path.dirname(__filename);
 
 function showHelp() {
     console.log(`
-Tatum MCP Server CLI
+Blockchain MCP Server CLI
 
 Usage:
-  tatum-mcp [options]
+  blockchain-mcp [options]
 
 Options:
   --api-key <key>     Set Tatum API key
@@ -29,14 +29,13 @@ Environment Variables:
   TATUM_API_KEY       Tatum API key (required)
 
 Examples:
-  tatum-mcp --api-key your-api-key
-  TATUM_API_KEY=your-key tatum-mcp
+  blockchain-mcp --api-key your-api-key
+  TATUM_API_KEY=your-key blockchain-mcp
 
-This MCP server provides 14 tools for blockchain operations:
-  • 10 Blockchain Data tools (balances, transactions, NFTs, etc.)
-  • 4 RPC Gateway tools (direct blockchain access)
+Starts the MCP server on stdio (for Cursor, Claude Desktop, etc.).
+Tools: 13 total — 10 Blockchain Data + 3 RPC Gateway.
 
-For more information, visit: https://docs.tatum.io
+For more information: https://github.com/tatumio/blockchain-mcp
 `);
 }
 

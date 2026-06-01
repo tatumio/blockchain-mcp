@@ -220,7 +220,7 @@ export const DATA_TOOLS = [
           enum: ['ASC', 'DESC']
         }
       },
-      required: ['chain']
+      required: ['chain', 'addresses']
     }
   },
   {
@@ -373,7 +373,7 @@ export class DataService {
   }
 
   async getTransactionHistory(args: any): Promise<any> {
-    const url = `/v4/data/transactions`;
+    const url = `/v4/data/transaction/history`;
     const parameters: any = {
       chain: args.chain
     };
@@ -424,11 +424,12 @@ export class DataService {
   }
 
   async getExchangeRate(args: any): Promise<any> {
-    const url = `/v3/tatum/rate/${args.symbol}`;
+    const url = `/v4/data/rate/symbol`;
     const parameters = {
+      symbol: args.symbol,
       basePair: args.basePair
     };
-    
+
     return await this.apiClient.executeRequest('GET', url, parameters);
   }
 }

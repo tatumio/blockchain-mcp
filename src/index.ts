@@ -43,7 +43,7 @@ class TatumMCPServer {
     this.server = new Server(
       {
         name: '@tatumio/blockchain-mcp',
-        version: '1.0.0',
+        version: '1.0.5',
       },
       {
         capabilities: {
@@ -143,8 +143,8 @@ class TatumMCPServer {
         return await this.dataService.checkOwner(args);
       
       case 'get_transaction_history':
-        if (!args.chain) {
-          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameter: chain');
+        if (!args.chain || !args.addresses) {
+          throw new McpError(ErrorCode.InvalidParams, 'Missing required parameters: chain, addresses');
         }
         return await this.dataService.getTransactionHistory(args);
       
@@ -274,7 +274,7 @@ class TatumMCPServer {
     const transport = new StdioServerTransport();
     
     const totalToolCount = GATEWAY_TOOLS.length + DATA_TOOLS.length;
-    console.error(`Loaded ${totalToolCount} tools (0 regular + ${GATEWAY_TOOLS.length} gateway + ${DATA_TOOLS.length} data)`);
+    console.error(`Loaded ${totalToolCount} tools (${DATA_TOOLS.length} data + ${GATEWAY_TOOLS.length} gateway)`);
     
     await this.server.connect(transport);
     console.error('Tatum MCP Server ready');
